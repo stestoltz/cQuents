@@ -1,5 +1,6 @@
 import re
 import math
+import sys
 
 LITERAL = "LITERAL"
 NUMBER = "NUMBER"
@@ -100,7 +101,12 @@ class Lexer:
     def __init__(self, text):
         self.text = text
         self.pos = 0
-        self.cur = self.text[self.pos]
+
+        try:
+            self.cur = self.text[self.pos]
+        except IndexError:
+            self.cur = None
+
         self.param_found = False
         self.mode = None
 
@@ -704,8 +710,14 @@ class Number(AST):
         self.token = token
         self.value = token.val
 
+try:
+    file = sys.argv[1]
+except IndexError:
+    file = "source.cq"
 
-source = open("source.cq").read()
+# print(file)
+
+source = open(file).read()
 
 # print(source)
 
