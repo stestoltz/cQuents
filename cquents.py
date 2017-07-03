@@ -16,8 +16,8 @@ PLUS = "+"
 MINUS = "-"
 MUL = "*"
 DIV = "/"
-# EXPONENT = "^"
-# MOD = "%"
+EXPONENT = "^"
+MOD = "%"
 
 # ~`!  # _{}[]?:;
 
@@ -34,7 +34,8 @@ is_previous_id = re.compile("^[q-z]$")
 
 class Builtins:
     def __init__(self):
-        self.all = "pf"
+        #self.all = "cfp"
+        self.all = "fpR"
 
         self.primes = [2, 3, 5, 7]
 
@@ -163,6 +164,12 @@ class Lexer:
             elif self.cur == "/":
                 self.advance()
                 return Token(DIV, "/")
+            elif self.cur == "^":
+                self.advance()
+                return Token(EXPONENT, "^")
+            elif self.cur == "%":
+                self.advance()
+                return Token(MOD, "%")
             elif self.cur == "(":
                 self.advance()
                 return Token(LPAREN, "(")
@@ -240,7 +247,7 @@ class Lexer:
 
     def peek(self):
         if self.pos + 1 >= len(self.text):
-            return None
+            return ""
 
         return self.text[self.pos + 1]
 
@@ -251,8 +258,9 @@ class Parser:
         self.token = self.lexer.read_token()
         self.test_lexer = get_test_lexer(self.lexer.text)
 
-        self.operations_1 = (MUL, DIV)
-        self.operations_2 = (MINUS, PLUS)
+        self.operations_1 = (EXPONENT,)
+        self.operations_2 = (MUL, DIV, MOD)
+        self.operations_3 = (MINUS, PLUS)
 
     def eat(self, type_):
         if self.token.type == type_:
@@ -387,8 +395,8 @@ class Parser:
         # get first term
         node = self.term()
 
-        # valid 2nd priority operations
-        while self.token.type in self.operations_2:
+        # valid 3rd priority operations
+        while self.token.type in self.operations_3:
             tok = self.token
 
             if tok.type == PLUS:
@@ -402,18 +410,35 @@ class Parser:
 
     def term(self):
         # get first factor
-        node = self.factor()
+        node = self.short_term()
 
-        # valid 1st priority operations
-        while self.token.type in self.operations_1 or self.token.can_multiply():
+        # valid 2nd priority operations
+        while self.token.type in self.operations_2 or self.token.can_multiply():
             tok = self.token
 
             if tok.type == MUL:
                 self.eat(MUL)
             if tok.type == DIV:
                 self.eat(DIV)
+            if tok.type == MOD:
+                self.eat(MOD)
             if tok.can_multiply():
                 tok = Token(MUL, "*")
+
+            node = BinOp(node, tok, self.short_term())
+
+        return node
+
+    def short_term(self):
+        # get first factor
+        node = self.factor()
+
+        # valid 1st priority operations
+        while self.token.type in self.operations_1:
+            tok = self.token
+
+            if tok.type == EXPONENT:
+                self.eat(EXPONENT)
 
             node = BinOp(node, tok, self.factor())
 
@@ -440,9 +465,9 @@ class Parser:
         elif tok.type == BUILTIN:
             builtin = tok.val
             self.eat(BUILTIN)
-            node = self.expr()
+            nodes = self.items()
             self.eat(RPAREN)
-            return Builtin(builtin, (node,))
+            return Builtin(builtin, nodes)
         elif tok.type == ID:
             return self.variable()
 
@@ -565,6 +590,10 @@ class Interpreter(NodeVisitor):
             return left * right
         elif node.op.type == DIV:
             return left / right
+        elif node.op.type == MOD:
+            return left % right
+        elif node.op.type == EXPONENT:
+            return left ** right
 
     def visit_Constant(self, node):
         if node.name in constants:
@@ -579,6 +608,18 @@ class Interpreter(NodeVisitor):
                 return builtins.next_prime(self.visit(node.parameters[0]))
             elif node.builtin == "f":
                 return math.factorial(self.visit(node.parameters[0]))
+            elif node.builtin == "R":
+                try:
+                    root = self.visit(node.parameters[1])
+                except IndexError:
+                    return math.sqrt(self.visit(node.parameters[0]))
+                return self.visit(node.parameters[0]) ** (1 / root)
+            #elif node.builtin == "c":
+            #    val = self.visit(node.parameters[0])
+            #    try:
+            #       return chr(val)
+            #    except ValueError:
+            #        return val
 
     def visit_UnaryOp(self, node):
         if node.op.type == MINUS:

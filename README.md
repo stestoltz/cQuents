@@ -72,10 +72,12 @@ The following variables are currently valid identifiers:
 | Type | Name | Syntax | Description
 | - | - | - | - |
 | Container | Parentheses | `(`code`)`\* | Acts like usual mathematical parentheses: surrounds a group of code and elevates it in the order of operations
+| Binary | Exponentation | `^` | Returns the left side to the power of the right side
 | Binary | Addition | `+` | Adds the left side to the right side
 | Binary | Subtraction | `-` | Subtracts the right side from the left side
 | Binary | Multiplication | `*`, implicit | Multiplies the left side by the right side; can be used implicitly, as in Algebra: `2z`, `2(1+$)`
 | Binary | Division | `/` | Divides the left side by the right side
+| Binary | Modulus | `%` | Gets the left side mod the right side
 | Unary | Negation | `-` | Negates the right side (only occurs when there is no left side)
 
 \* note that trailing `)`s right before the end of your code can all be left off
@@ -88,6 +90,7 @@ Builtin function are called with their identifier, a comma-delimited list of the
 | - | - | - | -
 | Next Prime | `p` | 1 | Returns the next prime **after** the first parameter
 | Factorial | `f` | 1 | Returns the factorial (`!`) of the first parameter
+| Root | `R` | 1 or 2 | If there is no second parameter, returns the square root of the first parameter. Otherwise, returns the first parameter to the power of the reciprocal of the second parameter
 
 ## Parameters
 
