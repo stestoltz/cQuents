@@ -721,7 +721,10 @@ source = open(file).read()
 
 # print(source)
 
-user_input = input().split(" ")
+try:
+    user_input = input().split(" ")
+except EOFError:
+    user_input = []
 
 for i in range(len(user_input)):
     item = user_input[i]
