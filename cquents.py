@@ -189,7 +189,7 @@ class Lexer:
                 self.advance()
                 return Token(LITERAL, temp)
 
-        raise TypeError("Unknown : " + self.cur)
+        raise SyntaxError("Unknown character found : " + self.cur)
 
     def advance(self):
         self.pos += 1
@@ -262,7 +262,7 @@ class Parser:
             if type_ == RPAREN or type_ == EOF:
                 return
 
-            raise TypeError("Incorrect token found: looking for " + type_ + ", found " + self.token.type + " | " + self.token.val + " at " + self.lexer.pos)
+            raise SyntaxError("Incorrect token found: looking for " + type_ + ", found " + self.token.type + " | " + self.token.val + " at " + self.lexer.pos)
 
     def is_mode_set(self):
         return self.test_lexer.mode
@@ -303,7 +303,7 @@ class Parser:
             program = Program(params.literals, all_input, params.start, n, mode, items, params.is_stringed)
             return program
 
-        raise NameError("Incorrect input length")
+        raise ValueError("Incorrect input length")
 
     def params(self):
         literals = ["", "", ""]
@@ -446,7 +446,7 @@ class Parser:
         elif tok.type == ID:
             return self.variable()
 
-        raise NameError("Unknown factor : " + (tok.val or tok.type))
+        raise SyntaxError("Unknown factor : " + (tok.val or tok.type))
 
 
 class NodeVisitor:
@@ -456,7 +456,7 @@ class NodeVisitor:
         return visitor(node)
 
     def generic_visit(self, node):
-        raise Exception("No visit_" + type(node).__name__ + " method")
+        raise ValueError("No visit_" + type(node).__name__ + " method")
 
 
 class Interpreter(NodeVisitor):
@@ -509,8 +509,8 @@ class Interpreter(NodeVisitor):
                             done = True
                     else:
                         print(cur_val, end=join)
-                        if self.current == 100:
-                            break
+                        # if self.current == 100:
+                        #     break
 
                 elif node.mode == "::":
                     if node.n:
