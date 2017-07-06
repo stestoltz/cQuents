@@ -518,7 +518,6 @@ class Interpreter(NodeVisitor):
         else:
             done = False
             sum_ = statement_index = 0
-            previous = None
 
             while not done:
                 if self.current <= len(node.start):
@@ -536,7 +535,10 @@ class Interpreter(NodeVisitor):
                 if node.mode == ":":
                     if node.n:
                         if node.n == self.current:
-                            print(cur_val, end="")
+                            if node.is_stringed:
+                                print(join.join(str(x) for x in self.sequence)[self.current - 1], end="")
+                            else:
+                                print(cur_val, end="")
                             done = True
                     else:
                         print(cur_val, end=join)
@@ -544,7 +546,11 @@ class Interpreter(NodeVisitor):
                         #     break
 
                 elif node.mode == "::":
+
                     if node.n:
+                        if node.is_stringed:
+                            cur_val = join.join(str(x) for x in self.sequence)[self.current - 1]
+
                         if node.n == self.current:
                             print(cur_val, end="")
                             done = True
