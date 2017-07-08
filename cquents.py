@@ -75,6 +75,39 @@ builtins = Builtins()
 constants = "ep"
 
 
+class Sequence:
+
+    def __init__(self, interpreter_, node):
+        self.interpreter = interpreter_
+        self.node = node
+        self.current = 1
+        self.statement_index = 0
+        self.sequence = []
+
+    def __getitem__(self, i_):
+        return self.sequence[i_]
+
+    def __iter__(self):
+        self.current = 0
+        self.statement_index = 0
+        self.sequence = []
+        return self
+
+    def __next__(self):
+        if self.current < len(self.node.start):
+            cur_val = self.interpreter.visit(self.node.start[self.current])
+        else:
+            if self.statement_index >= len(self.node.statements):
+                self.statement_index = 0
+
+            cur_val = self.interpreter.visit(self.node.statements[self.statement_index])
+            self.statement_index += 1
+
+        self.sequence.append(cur_val)
+        self.current += 1
+        return cur_val
+
+
 def get_input_val(char):
     return ord(char) - 65
 
@@ -140,6 +173,10 @@ class Lexer:
                 self.param_found = True
                 self.advance()
                 return Token(PARAM, "#")
+            elif self.cur == "$":
+                self.param_found = True
+                self.advance()
+                return Token(PARAM, "$")
             elif self.cur == '"':
                 self.param_found = True
                 self.advance()
@@ -314,7 +351,7 @@ class Parser:
 
             # print(all_input)
 
-            program = Program(params.literals, all_input, params.start, n, mode, items, params.is_stringed)
+            program = Program(params, all_input, n, mode, items)
             return program
 
         raise ValueError("Incorrect input length")
@@ -333,7 +370,7 @@ class Parser:
                 lit_index += 1
 
         default_input = ([], [])
-        start = []
+        start = current_start = []
         is_stringed = False
 
         while self.token.type == PARAM:
@@ -343,11 +380,15 @@ class Parser:
             elif self.token.val == "=":
                 self.eat(PARAM)
                 start = self.items()
+            elif self.token.val == "$":
+                self.eat(PARAM)
+                current_start = self.items()
+
             elif self.token.val == '"':
                 self.eat(PARAM)
                 is_stringed = True
 
-        params = Params(literals, default_input, start, is_stringed)
+        params = Params(literals, default_input, start, current_start, is_stringed)
         return params
 
     def mode(self):
@@ -491,16 +532,20 @@ class NodeVisitor:
 
 
 class Interpreter(NodeVisitor):
-    def __init__(self, tree):
-        self.tree = tree
-        self.sequence = []
+    def __init__(self, tree_):
+        self.tree = tree_
+        self.sequence = None
         self.current = 1
+        self.current_inc = 1
         self.program = None
 
     def visit_Program(self, node):
         # TODO: Do different if mode == "?"
 
         self.program = node
+        self.sequence = Sequence(self, node)
+        self.current = self.visit(node.current_start[0]) if len(node.current_start) >= 1 else 1
+        self.current_inc = self.visit(node.current_start[1]) if len(node.current_start) >= 2 else 1
 
         # starting literals
         print(node.literals[0], end="")
@@ -516,77 +561,50 @@ class Interpreter(NodeVisitor):
             pass
 
         else:
-            done = False
-            sum_ = statement_index = 0
+            sum_ = 0
 
-            while not done:
-                if self.current <= len(node.start):
-                    cur_val = self.visit(node.start[self.current - 1])
-                else:
-                    if statement_index >= len(node.statements):
-                        statement_index = 0
-
-                    cur_val = self.visit(node.statements[statement_index])
-
-                    statement_index += 1
-
-                self.sequence.append(cur_val)
+            for val in self.sequence:
 
                 if node.mode == ":":
                     if node.n:
                         if node.n == self.current:
-                            if node.is_stringed:
-                                print(join.join(str(x) for x in self.sequence)[self.current - 1], end="")
-                            else:
-                                print(cur_val, end="")
-                            done = True
+                            print(val, end="")
+                            break
                     else:
-                        print(cur_val, end=join)
-                        # if self.current == 100:
-                        #     break
+                        print(val, end=join)
 
                 elif node.mode == "::":
-
                     if node.n:
-                        if node.is_stringed:
-                            cur_val = join.join(str(x) for x in self.sequence)[self.current - 1]
-
                         if node.n == self.current:
-                            print(cur_val, end="")
-                            done = True
+                            print(val, end="")
+                            break
                         else:
-                            print(cur_val, end=join)
-                    else:
-                        pass  # should never be reached
+                            print(val, end=join)
 
                 elif node.mode == ";":
-                    sum_ += cur_val
+                    sum_ += val
 
                     if node.n:
                         if node.n == self.current:
                             print(sum_, end="")
-                            done = True
+                            break
                     # elif sum_ == previous_sum
 
                 elif node.mode == "?":
                     if query_n:
-                        if node.n == cur_val:
+                        if node.n == val:
                             print("true", end="")
-                            done = True
+                            break
                         # elif previous and cur_val < previous:
                         #     print("false", end="")
                         #     done = True
 
                         # TODO: FIXME
-                        elif cur_val > node.n:
+                        elif val > node.n:
                             print("false", end="")
-                            done = True
-                    else:
-                        pass  # should never be reached
+                            break
 
-                if not done:
-                    self.current += 1
-                    previous = cur_val
+                self.current += self.current_inc
 
         print(node.literals[2], end="")
 
@@ -659,10 +677,11 @@ class Interpreter(NodeVisitor):
 
 
 class Params:
-    def __init__(self, literals, default_input, start, is_stringed):
+    def __init__(self, literals, default_input, start, current_start, is_stringed):
         self.literals = literals
         self.default_input = default_input
         self.start = start
+        self.current_start = current_start
         self.is_stringed = is_stringed
 
 
@@ -671,14 +690,15 @@ class AST:
 
 
 class Program(AST):
-    def __init__(self, literals, input_, start, n, mode, statements, is_stringed):
-        self.literals = literals
+    def __init__(self, params, input_, n, mode, statements):
+        self.literals = params.literals
         self.input = input_
-        self.start = start
+        self.start = params.start
+        self.current_start = params.current_start
         self.n = n
         self.mode = mode
         self.statements = statements
-        self.is_stringed = is_stringed
+        self.is_stringed = params.is_stringed
 
 
 class BinOp(AST):

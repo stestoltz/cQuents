@@ -18,6 +18,7 @@ Heavily influenced by https://ruslanspivak.com/lsbasi-part1/
      - [Literals](https://github.com/stestoltz/cQuents#literals)
      - [Default Input](https://github.com/stestoltz/cQuents#default-input)
      - [Sequence Start](https://github.com/stestoltz/cQuents#sequence-start)
+     - [Starting Index](https://github.com/stestoltz/cQuents#starting-index)
      - [Stringify](https://github.com/stestoltz/cQuents#stringify)
 - [Examples](https://github.com/stestoltz/cQuents#examples)
 
@@ -115,6 +116,10 @@ The default input can be split in two with `|`. The list on the left side of `|`
 ### Sequence Start
 
 `=` signifies that the list following it will be the beginning terms of the sequence. These will be the terms returned if `n` falls into their range. The previous variables, `z` to `q`, may evaluate to parts of the sequence start early on in the sequence.
+
+### Starting Index
+
+`$` allows you to change the starting index in the sequence. The default is `1`, with an increment of `1`. The first parameter passed to `$` will be the new starting index, and the optional second parameter passed to `$` will be the new increment. Make sure that this increment will reach `n` if you are setting `n` - there is currently no checking except for equality, though this may change in the future.
 
 ### Stringify
 
