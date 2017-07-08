@@ -28,9 +28,9 @@ LPAREN = "("
 RPAREN = ")"
 
 is_one_int = re.compile("^[0-9]$")
-is_id = re.compile("^[$q-zA-J]$")
-is_input_id = re.compile("^[A-J]$")
-is_previous_id = re.compile("^[q-z]$")
+is_id = re.compile("^[$v-zA-E]$")
+is_input_id = re.compile("^[A-E]$")
+is_previous_id = re.compile("^[v-z]$")
 
 
 class Builtins:
@@ -665,7 +665,7 @@ class Interpreter(NodeVisitor):
                 temp = 0
             return temp
         elif is_input_id.match(node.name):
-            return self.program.input[-1 - get_input_val(node.name)]
+            return self.program.input[get_input_val(node.name)]
 
     def visit_Number(self, node):
         return node.value

@@ -55,9 +55,9 @@ The following variables are currently valid identifiers:
 
 | Name | Syntax | Description
 | - | - | -
-| Input | `A` to `J` | Gets the last (`A`) to tenth-from-last (`J`) input (not including `n`; see **Parameters.Input** section for more details)
-| Previous | `q` to `z` | Gets the most recent (`z`) to tenth most recent (`q`) terms in the sequence. This means terms that have already been calculated. Defaults to `0`.
-| Current | `$` | Gets what term we are currently calculating in the sequence, starting with `1`.
+| Input | `A` to `E` | Gets the first (`A`) to fifth (`E`) input (not including `n`; see **Parameters.Input** section for more details)
+| Previous | `v` to `z` | Gets the most recent (`z`) to fifth most recent (`v`) terms in the sequence. This means terms that have already been calculated. Defaults to `0`.
+| Current | `$` | Gets what term we are currently calculating in the sequence, starting with the starting index, if set, or `1`.
 
 #### Constants
 
