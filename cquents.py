@@ -35,9 +35,6 @@ is_previous_id = re.compile("^[v-z]$")
 
 class Builtins:
     def __init__(self):
-        #self.all = "cfp"
-        self.all = "fpR"
-
         self.primes = [2, 3, 5, 7]
 
     def next_prime(self, n):
@@ -71,8 +68,25 @@ class Builtins:
 
                 to_check += 2
 
-builtins = Builtins()
-constants = "ep"
+    def root(self, inter, node):
+        try:
+            root = inter.visit(node.parameters[1])
+        except IndexError:
+            return math.sqrt(inter.visit(node.parameters[0]))
+        return inter.visit(node.parameters[0]) ** (1 / root)
+
+
+builtin_helper = Builtins()
+
+builtins = {
+    "f": lambda inter, node: math.factorial(inter.visit(node.parameters[0])),
+    "r": lambda inter, node: builtin_helper.root(inter, node)
+}
+
+constants = {
+    "e": math.e,
+    "p": math.pi
+}
 
 
 class Sequence:
@@ -150,7 +164,7 @@ class Lexer:
             return Token(EOF, "")
 
         if self.mode:
-            if self.cur in builtins.all:
+            if self.cur in builtins:
                 temp = self.cur
                 self.advance()
                 return Token(BUILTIN, temp)
@@ -626,30 +640,10 @@ class Interpreter(NodeVisitor):
             return left ** right
 
     def visit_Constant(self, node):
-        if node.name in constants:
-            if node.name == "e":
-                return math.e
-            elif node.name == "p":
-                return math.pi
+        return constants[node.name]
 
     def visit_Builtin(self, node):
-        if node.builtin in builtins.all:
-            if node.builtin == "p":
-                return builtins.next_prime(self.visit(node.parameters[0]))
-            elif node.builtin == "f":
-                return math.factorial(self.visit(node.parameters[0]))
-            elif node.builtin == "R":
-                try:
-                    root = self.visit(node.parameters[1])
-                except IndexError:
-                    return math.sqrt(self.visit(node.parameters[0]))
-                return self.visit(node.parameters[0]) ** (1 / root)
-            #elif node.builtin == "c":
-            #    val = self.visit(node.parameters[0])
-            #    try:
-            #       return chr(val)
-            #    except ValueError:
-            #        return val
+        if node.builtin in builtins:
 
     def visit_UnaryOp(self, node):
         if node.op.type == MINUS:
