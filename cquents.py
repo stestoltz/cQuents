@@ -7,8 +7,6 @@ NUMBER = "NUMBER"
 MODE = "MODE"
 ID = "ID"
 PARAM = "PARAM"
-SEPARATOR = "SEPARATOR"
-LITERALSEPARATOR = "LITERALSEPARATOR"
 BUILTIN = "BUILTIN"
 CONSTANT = "CONSTANT"
 EOF = "EOF"
@@ -24,6 +22,8 @@ MOD = "%"
 
 # &= | \"<>
 
+SEPARATOR = ","
+LITERALSEPARATOR = "|"
 LPAREN = "("
 RPAREN = ")"
 
@@ -192,22 +192,11 @@ class Lexer:
                     self.advance()
 
                 return Token(MODE, self.mode)
-            elif self.cur == "=":
+            elif self.cur in ("=", "#", "$", '"'):
                 self.param_found = True
+                param = self.cur
                 self.advance()
-                return Token(PARAM, "=")
-            elif self.cur == "#":
-                self.param_found = True
-                self.advance()
-                return Token(PARAM, "#")
-            elif self.cur == "$":
-                self.param_found = True
-                self.advance()
-                return Token(PARAM, "$")
-            elif self.cur == '"':
-                self.param_found = True
-                self.advance()
-                return Token(PARAM, '"')
+                return Token(PARAM, param)
             elif self.cur == "|":
                 self.advance()
                 return Token(LITERALSEPARATOR, "|")
