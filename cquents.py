@@ -362,7 +362,7 @@ class Parser:
 
             n = None
             if input_length_difference == 1:
-                n = int(all_input.pop())
+                n = all_input.pop()
 
             # print(all_input)
 
@@ -391,7 +391,7 @@ class Parser:
         while self.token.type == PARAM:
             if self.token.val == "#":
                 self.eat(PARAM)
-                default_input = self.num_list()
+                default_input = self.input_list()
             elif self.token.val == "=":
                 self.eat(PARAM)
                 start = self.items()
@@ -422,28 +422,23 @@ class Parser:
 
         return items
 
-    def num_list(self):
+    def input_list(self):
         items = ([], [])
 
         inc = 0
 
         while inc <= 1:
-
-            if self.token.type == NUMBER:
-                items[inc].append(self.token.val)
-                self.eat(NUMBER)
-
-            while self.token.type == SEPARATOR:
-                self.eat(SEPARATOR)
-
-                if self.token.type == NUMBER:
-                    items[inc].append(self.token.val)
-                    self.eat(NUMBER)
-
             if self.token.type == LITERALSEPARATOR and inc == 0:
                 self.eat(LITERALSEPARATOR)
                 inc += 1
-            else:
+            elif inc == 1:
+                break
+
+            items[inc].append(self.expr())
+
+            if self.token.type == SEPARATOR:
+                self.eat(SEPARATOR)
+            elif self.token.type != LITERALSEPARATOR:
                 break
 
         return items
@@ -565,14 +560,15 @@ class Interpreter(NodeVisitor):
         # starting literals
         print(node.literals[0], end="")
 
-        query_n = node.n == 0 or node.n
+        n = self.visit(node.n)
+        query_n = n == 0 or n
 
         if node.is_stringed:
             join = node.literals[1] or ""
         else:
             join = node.literals[1] or ","
 
-        if (node.mode == "::" and not node.n) or (node.mode == "?" and not query_n):
+        if (node.mode == "::" and not n) or (node.mode == "?" and not query_n):
             pass
 
         else:
@@ -581,16 +577,16 @@ class Interpreter(NodeVisitor):
             for val in self.sequence:
 
                 if node.mode == ":":
-                    if node.n:
-                        if node.n == self.current:
+                    if n:
+                        if n == self.current:
                             print(val, end="")
                             break
                     else:
                         print(val, end=join)
 
                 elif node.mode == "::":
-                    if node.n:
-                        if node.n == self.current:
+                    if n:
+                        if n == self.current:
                             print(val, end="")
                             break
                         else:
@@ -599,15 +595,15 @@ class Interpreter(NodeVisitor):
                 elif node.mode == ";":
                     sum_ += val
 
-                    if node.n:
-                        if node.n == self.current:
+                    if n:
+                        if n == self.current:
                             print(sum_, end="")
                             break
                     # elif sum_ == previous_sum
 
                 elif node.mode == "?":
                     if query_n:
-                        if node.n == val:
+                        if n == val:
                             print("true", end="")
                             break
                         # elif previous and cur_val < previous:
@@ -615,7 +611,7 @@ class Interpreter(NodeVisitor):
                         #     done = True
 
                         # TODO: FIXME
-                        elif val > node.n:
+                        elif val > n:
                             print("false", end="")
                             break
 
@@ -661,7 +657,7 @@ class Interpreter(NodeVisitor):
                 temp = 0
             return temp
         elif is_input_id.match(node.name):
-            return self.program.input[get_input_val(node.name)]
+            return self.visit(self.program.input[get_input_val(node.name)])
 
     def visit_Number(self, node):
         return node.value
@@ -748,18 +744,19 @@ try:
 except EOFError:
     user_input = []
 
-for i in range(len(user_input)):
-    item = user_input[i]
-    try:
-        user_input[i] = int(item)
-    except ValueError:
-        try:
-            user_input[i] = float(item)
-        except ValueError:
-            pass
-
 if user_input == ['']:
     user_input = []
+
+if user_input is not []:
+    for i in range(len(user_input)):
+        item = user_input[i]
+        try:
+            user_input[i] = Number(Token(NUMBER, int(item)))
+        except ValueError:
+            try:
+                user_input[i] = Number(Token(NUMBER, float(item)))
+            except ValueError:
+                user_input[i] = Number(Token(LITERAL, item))
 
 # print(user_input)
 
