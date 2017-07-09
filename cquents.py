@@ -80,6 +80,7 @@ builtin_helper = Builtins()
 
 builtins = {
     "f": lambda inter, node: math.factorial(inter.visit(node.parameters[0])),
+    "p": lambda inter, node: builtin_helper.next_prime(inter.visit(node.parameters[0])),
     "r": lambda inter, node: builtin_helper.root(inter, node)
 }
 
@@ -644,6 +645,7 @@ class Interpreter(NodeVisitor):
 
     def visit_Builtin(self, node):
         if node.builtin in builtins:
+            return builtins[node.builtin](self, node)
 
     def visit_UnaryOp(self, node):
         if node.op.type == MINUS:
