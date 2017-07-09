@@ -89,6 +89,18 @@ constants = {
     "p": math.pi
 }
 
+unary_ops = {
+    "-": lambda x: -x
+}
+
+binary_ops = {
+    PLUS: lambda x, y: x + y,
+    MINUS: lambda x, y: x - y,
+    MUL: lambda x, y: x * y,
+    DIV: lambda x, y: x / y,
+    EXPONENT: lambda x, y: x ** y,
+    MOD: lambda x, y: x % y
+}
 
 class Sequence:
 
@@ -316,9 +328,9 @@ class Parser:
         self.token = self.lexer.read_token()
         self.test_lexer = get_test_lexer(self.lexer.text)
 
-        self.operations_1 = (EXPONENT,)
-        self.operations_2 = (MUL, DIV, MOD)
-        self.operations_3 = (MINUS, PLUS)
+        self.operations_1 = EXPONENT,
+        self.operations_2 = MUL, DIV, MOD
+        self.operations_3 = MINUS, PLUS
 
     def eat(self, type_):
         if self.token.type == type_:
@@ -384,7 +396,7 @@ class Parser:
                 self.eat(LITERALSEPARATOR)
                 lit_index += 1
 
-        default_input = ([], [])
+        default_input = [], []
         start = current_start = []
         is_stringed = False
 
@@ -423,7 +435,7 @@ class Parser:
         return items
 
     def input_list(self):
-        items = ([], [])
+        items = [], []
 
         inc = 0
 
@@ -560,13 +572,17 @@ class Interpreter(NodeVisitor):
         # starting literals
         print(node.literals[0], end="")
 
-        n = self.visit(node.n)
-        query_n = n == 0 or n
+        if node.n is not None:
+            n = self.visit(node.n)
+            query_n = n == 0 or n
+        else:
+            n = None
+            query_n = False
 
         if node.is_stringed:
             join = node.literals[1] or ""
         else:
-            join = node.literals[1] or ","
+            join = node.literals[1] or SEPARATOR
 
         if (node.mode == "::" and not n) or (node.mode == "?" and not query_n):
             pass
@@ -623,18 +639,8 @@ class Interpreter(NodeVisitor):
         left = self.visit(node.left)
         right = self.visit(node.right)
 
-        if node.op.type == PLUS:
-            return left + right
-        elif node.op.type == MINUS:
-            return left - right
-        elif node.op.type == MUL:
-            return left * right
-        elif node.op.type == DIV:
-            return left / right
-        elif node.op.type == MOD:
-            return left % right
-        elif node.op.type == EXPONENT:
-            return left ** right
+        if node.op.type in binary_ops:
+            return binary_ops[node.op.type](left, right)
 
     def visit_Constant(self, node):
         return constants[node.name]
@@ -644,8 +650,8 @@ class Interpreter(NodeVisitor):
             return builtins[node.builtin](self, node)
 
     def visit_UnaryOp(self, node):
-        if node.op.type == MINUS:
-            return -self.visit(node.expr)
+        if node.op.type in unary_ops:
+            return unary_ops[node.op.type](self.visit(node.expr))
 
     def visit_Var(self, node):
         if node.name == "$":
