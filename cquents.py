@@ -90,7 +90,7 @@ constants = {
 }
 
 unary_ops = {
-    "-": lambda x: -x
+    MINUS: lambda x: -x
 }
 
 binary_ops = {
@@ -102,12 +102,13 @@ binary_ops = {
     MOD: lambda x, y: x % y
 }
 
+
 class Sequence:
 
     def __init__(self, interpreter_, node):
         self.interpreter = interpreter_
         self.node = node
-        self.current = 1
+        self.current = 0
         self.statement_index = 0
         self.sequence = []
 
@@ -176,12 +177,7 @@ class Lexer:
         if self.cur is None:
             return Token(EOF, "")
 
-        if self.mode:
-            if self.cur in builtins:
-                temp = self.cur
-                self.advance()
-                return Token(BUILTIN, temp)
-        else:
+        if not self.mode:
             if self.cur in (":", ";", "?"):
                 self.mode = self.cur
                 self.param_found = True
@@ -211,33 +207,14 @@ class Lexer:
                 temp = self.cur
                 self.advance()
                 return Token(CONSTANT, temp)
-            elif self.cur == "+":
+            elif self.cur in builtins:
+                temp = self.cur
                 self.advance()
-                return Token(PLUS, "+")
-            elif self.cur == "-":
+                return Token(BUILTIN, temp)
+            elif self.cur in (PLUS, MINUS, MUL, DIV, EXPONENT, MOD, LPAREN, RPAREN, SEPARATOR):
+                temp = self.cur
                 self.advance()
-                return Token(MINUS, "-")
-            elif self.cur == "*":
-                self.advance()
-                return Token(MUL, "*")
-            elif self.cur == "/":
-                self.advance()
-                return Token(DIV, "/")
-            elif self.cur == "^":
-                self.advance()
-                return Token(EXPONENT, "^")
-            elif self.cur == "%":
-                self.advance()
-                return Token(MOD, "%")
-            elif self.cur == "(":
-                self.advance()
-                return Token(LPAREN, "(")
-            elif self.cur == ")":
-                self.advance()
-                return Token(RPAREN, ")")
-            elif self.cur == ",":
-                self.advance()
-                return Token(SEPARATOR, ",")
+                return Token(temp, temp)
 
         if self.cur == "@":
             self.advance()
@@ -317,22 +294,18 @@ class Parser:
         self.token = self.lexer.read_token()
         self.test_lexer = get_test_lexer(self.lexer.text)
 
-        self.operations_1 = EXPONENT,
-        self.operations_2 = MUL, DIV, MOD
-        self.operations_3 = MINUS, PLUS
+        self.operations_1 = (EXPONENT,)
+        self.operations_2 = (MUL, DIV, MOD)
+        self.operations_3 = (MINUS, PLUS)
 
     def eat(self, type_):
         if self.token.type == type_:
-            # print(self.token.type + " " + str(self.token.val))
             self.token = self.lexer.read_token()
         else:
             if type_ == RPAREN or type_ == EOF:
                 return
 
             raise SyntaxError("Incorrect token found: looking for " + type_ + ", found " + self.token.type + " | " + self.token.val + " at " + self.lexer.pos)
-
-    def is_mode_set(self):
-        return self.test_lexer.mode
 
     def parse(self, input_):
         program = self.program(input_)
@@ -386,7 +359,8 @@ class Parser:
                 lit_index += 1
 
         default_input = [], []
-        start = current_start = []
+        start = []
+        current_start = []
         is_stringed = False
 
         while self.token.type == PARAM:
@@ -399,7 +373,6 @@ class Parser:
             elif self.token.val == "$":
                 self.eat(PARAM)
                 current_start = self.items()
-
             elif self.token.val == '"':
                 self.eat(PARAM)
                 is_stringed = True
@@ -457,10 +430,7 @@ class Parser:
         while self.token.type in self.operations_3:
             tok = self.token
 
-            if tok.type == PLUS:
-                self.eat(PLUS)
-            elif tok.type == MINUS:
-                self.eat(MINUS)
+            self.eat(tok.type)
 
             node = BinOp(node, tok, self.term())
 
@@ -474,14 +444,10 @@ class Parser:
         while self.token.type in self.operations_2 or self.token.can_multiply():
             tok = self.token
 
-            if tok.type == MUL:
-                self.eat(MUL)
-            if tok.type == DIV:
-                self.eat(DIV)
-            if tok.type == MOD:
-                self.eat(MOD)
             if tok.can_multiply():
-                tok = Token(MUL, "*")
+                tok = Token(MUL, MUL)
+            else:
+                self.eat(tok.type)
 
             node = BinOp(node, tok, self.short_term())
 
@@ -495,8 +461,7 @@ class Parser:
         while self.token.type in self.operations_1:
             tok = self.token
 
-            if tok.type == EXPONENT:
-                self.eat(EXPONENT)
+            self.eat(tok.type)
 
             node = BinOp(node, tok, self.factor())
 
@@ -573,7 +538,7 @@ class Interpreter(NodeVisitor):
         else:
             join = node.literals[1] or SEPARATOR
 
-        if (node.mode == "::" and not n) or (node.mode == "?" and not query_n):
+        if node.mode in ("::", "?") and not query_n:
             pass
 
         else:
@@ -582,7 +547,7 @@ class Interpreter(NodeVisitor):
             for val in self.sequence:
 
                 if node.mode == ":":
-                    if n:
+                    if query_n:
                         if n == self.current:
                             print(val, end="")
                             break
@@ -590,7 +555,7 @@ class Interpreter(NodeVisitor):
                         print(val, end=join)
 
                 elif node.mode == "::":
-                    if n:
+                    if query_n:
                         if n == self.current:
                             print(val, end="")
                             break
@@ -600,7 +565,7 @@ class Interpreter(NodeVisitor):
                 elif node.mode == ";":
                     sum_ += val
 
-                    if n:
+                    if query_n:
                         if n == self.current:
                             print(sum_, end="")
                             break
