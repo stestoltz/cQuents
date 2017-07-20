@@ -78,6 +78,7 @@ The following variables are currently valid identifiers:
 | Binary | Subtraction | `-` | Subtracts the right side from the left side
 | Binary | Multiplication | `*`, implicit | Multiplies the left side by the right side; can be used implicitly, as in Algebra: `2z`, `2(1+$)`
 | Binary | Division | `/` | Divides the left side by the right side
+| Binary | Integer Division | `//` | Integer divides the left side by the right side
 | Binary | Modulus | `%` | Gets the left side mod the right side
 | Unary | Negation | `-` | Negates the right side (only occurs when there is no left side)
 
@@ -89,9 +90,15 @@ Builtin function are called with their identifier, a comma-delimited list of the
 
 | Name | Identifier | Parameters | Description
 | ---- | ---------- | ---------- | -----------
-| Next Prime | `p` | 1 | Returns the next prime **after** the first parameter
+| Absolute Value | `a` | 1 | Returns the absolute value of the first parameter
+| Ceiling | `c` | 1 | Returns the ceil of the first parameter
 | Factorial | `f` | 1 | Returns the factorial (`!`) of the first parameter
-| Root | `R` | 1 or 2 | If there is no second parameter, returns the square root of the first parameter. Otherwise, returns the first parameter to the power of the reciprocal of the second parameter
+| Floor | `F` | 1 | Returns the floor of the first parameter
+| Next Prime | `p` | 1 | Returns the next prime **after** the first parameter
+| Root | `r` | 1 or 2 | If there is no second parameter, returns the square root of the first parameter. Otherwise, returns the first parameter to the power of the reciprocal of the second parameter
+| Cosine | `\c` | 1 | Returns the cos of the first parameter
+| Sine | `\s` | 1 | Returns the sin of the first parameter
+| Tangent | `\t` | 1 | Returns the tan of the first parameter
 
 ## Parameters
 

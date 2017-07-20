@@ -15,6 +15,7 @@ PLUS = "+"
 MINUS = "-"
 MUL = "*"
 DIV = "/"
+INT_DIV = "//"
 EXPONENT = "^"
 MOD = "%"
 
@@ -79,9 +80,15 @@ class Builtins:
 builtin_helper = Builtins()
 
 builtins = {
+    "a": lambda inter, node: math.fabs(inter.visit(node.parameters[0])),
+    "c": lambda inter, node: math.ceil(inter.visit(node.parameters[0])),
     "f": lambda inter, node: math.factorial(inter.visit(node.parameters[0])),
+    "F": lambda inter, node: math.floor(inter.visit(node.parameters[0])),
     "p": lambda inter, node: builtin_helper.next_prime(inter.visit(node.parameters[0])),
-    "r": lambda inter, node: builtin_helper.root(inter, node)
+    "r": lambda inter, node: builtin_helper.root(inter, node),
+    "\\c": lambda inter, node: math.cos(inter.visit(node.parameters[0])),
+    "\\s": lambda inter, node: math.sin(inter.visit(node.parameters[0])),
+    "\\t": lambda inter, node: math.tan(inter.visit(node.parameters[0]))
 }
 
 constants = {
@@ -98,6 +105,7 @@ binary_ops = {
     MINUS: lambda x, y: x - y,
     MUL: lambda x, y: x * y,
     DIV: lambda x, y: x / y,
+    INT_DIV: lambda x, y: x // y,
     EXPONENT: lambda x, y: x ** y,
     MOD: lambda x, y: x % y
 }
@@ -216,7 +224,18 @@ class Lexer:
                 temp = self.cur
                 self.advance()
                 return Token(BUILTIN, temp)
+            elif self.cur == "\\" and self.cur + self.peek() in builtins:
+                temp = self.cur
+                self.advance()
+                temp += self.cur
+                self.advance()
+                return Token(BUILTIN, temp)
             elif self.cur in (PLUS, MINUS, MUL, DIV, EXPONENT, MOD, LPAREN, RPAREN, SEPARATOR):
+                if self.cur == DIV and self.peek() == DIV:
+                    self.advance()
+                    self.advance()
+                    return Token(INT_DIV, INT_DIV)
+
                 temp = self.cur
                 self.advance()
                 return Token(temp, temp)
@@ -300,7 +319,7 @@ class Parser:
         self.test_lexer = get_test_lexer(self.lexer.text)
 
         self.operations_1 = (EXPONENT,)
-        self.operations_2 = (MUL, DIV, MOD)
+        self.operations_2 = (MUL, DIV, INT_DIV, MOD)
         self.operations_3 = (MINUS, PLUS)
 
     def eat(self, type_):
