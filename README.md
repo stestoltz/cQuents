@@ -33,7 +33,7 @@ Input is currently given as a space delimited list of numbers. Your program will
 cQuents is designed with sequences in mind. Before you start creating a cQuents program, you need to select a mode. Currently, there are four modes:
 
 | Name | Syntax | Description
-| - | - | -
+| ---- | ------ | -----------
 | Sequence 1 | `:` | If there is `n`, output the `n`th term; if no `n`, output the whole sequence
 | Sequence 2 | `::` | If there is `n`, output the sequence up to `n`; if no `n`, TODO: converge or diverge
 | Series | `;` | If there is `n`, output the sum of the sequence (or "series") up to `n`; if no `n`, output the whole series
@@ -54,7 +54,7 @@ The interpreter reads a number when it reaches a `.` or a digit.
 The following variables are currently valid identifiers:
 
 | Name | Syntax | Description
-| - | - | -
+| ---- | ------ | -----------
 | Input | `A` to `E` | Gets the first (`A`) to fifth (`E`) input (not including `n`; see **Parameters.Input** section for more details)
 | Previous | `v` to `z` | Gets the most recent (`z`) to fifth most recent (`v`) terms in the sequence. This means terms that have already been calculated. Defaults to `0`.
 | Current | `$` | Gets what term we are currently calculating in the sequence, starting with the starting index, if set, or `1`.
@@ -64,14 +64,14 @@ The following variables are currently valid identifiers:
 `_` signifies that the next char will be a constant identifier. The following are currently valid constants:
 
 | Name | Syntax | ~Value | Description
-| - | - | - | -
+| ---- | ------ | ------ | -----------
 | pi | `_p` | `3.141592653589793` | Currently equals Python's `math.pi`
 | e | `_e` | `2.718281828459045` | Currently equals Python's `math.e`
 
 #### Operations
 
 | Type | Name | Syntax | Description
-| - | - | - | - |
+| ---- | ---- | ------ | -----------
 | Container | Parentheses | `(`code`)`\* | Acts like usual mathematical parentheses: surrounds a group of code and elevates it in the order of operations
 | Binary | Exponentation | `^` | Returns the left side to the power of the right side
 | Binary | Addition | `+` | Adds the left side to the right side
@@ -88,7 +88,7 @@ The following variables are currently valid identifiers:
 Builtin function are called with their identifier, a comma-delimited list of their parameters, and a closing parenthesis (`)`). Remember that trailing `)`s can be left off.
 
 | Name | Identifier | Parameters | Description
-| - | - | - | -
+| ---- | ---------- | ---------- | -----------
 | Next Prime | `p` | 1 | Returns the next prime **after** the first parameter
 | Factorial | `f` | 1 | Returns the factorial (`!`) of the first parameter
 | Root | `R` | 1 or 2 | If there is no second parameter, returns the square root of the first parameter. Otherwise, returns the first parameter to the power of the reciprocal of the second parameter

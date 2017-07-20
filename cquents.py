@@ -133,6 +133,11 @@ class Sequence:
 
         self.sequence.append(cur_val)
         self.current += 1
+
+        # TODO: work with not just ints
+        if self.node.is_stringed:
+            return int(interpreter.join.join([str(x) for x in self.sequence])[self.current - 1])
+
         return cur_val
 
 
@@ -514,6 +519,7 @@ class Interpreter(NodeVisitor):
         self.current = 1
         self.current_inc = 1
         self.program = None
+        self.join = ","
 
     def visit_Program(self, node):
         # TODO: Do different if mode == "?"
@@ -534,9 +540,9 @@ class Interpreter(NodeVisitor):
             query_n = False
 
         if node.is_stringed:
-            join = node.literals[1] or ""
+            self.join = node.literals[1] or ""
         else:
-            join = node.literals[1] or SEPARATOR
+            self.join = node.literals[1] or SEPARATOR
 
         if node.mode in ("::", "?") and not query_n:
             pass
@@ -552,7 +558,7 @@ class Interpreter(NodeVisitor):
                             print(val, end="")
                             break
                     else:
-                        print(val, end=join)
+                        print(val, end=self.join)
 
                 elif node.mode == "::":
                     if query_n:
@@ -560,7 +566,7 @@ class Interpreter(NodeVisitor):
                             print(val, end="")
                             break
                         else:
-                            print(val, end=join)
+                            print(val, end=self.join)
 
                 elif node.mode == ";":
                     sum_ += val
