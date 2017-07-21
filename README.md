@@ -94,9 +94,11 @@ Builtin function are called with their identifier, a comma-delimited list of the
 | Ceiling | `c` | 1 | Returns the ceil of the first parameter
 | Factorial | `f` | 1 | Returns the factorial (`!`) of the first parameter
 | Floor | `F` | 1 | Returns the floor of the first parameter
+| Logarithm | `l` | 1 or 2 | If there is no second parameter, returns the natural logarithm (base `e` logarithm) of the first parameter. Otherwise, returns the base [second-parameter] logarithm of the first parameter.
 | Next Prime | `p` | 1 | Returns the next prime **after** the first parameter
 | Root | `r` | 1 or 2 | If there is no second parameter, returns the square root of the first parameter. Otherwise, returns the first parameter to the power of the reciprocal of the second parameter
 | Cosine | `\c` | 1 | Returns the cos of the first parameter
+| Logarithm 2 | `\l` | 1 | Returns the base `10` logarithm of the first parameter
 | Sine | `\s` | 1 | Returns the sin of the first parameter
 | Tangent | `\t` | 1 | Returns the tan of the first parameter
 
@@ -112,7 +114,7 @@ When specifying literals, they are in the format `<front>|<between>|<back>`. You
 
 Literals are used when displaying your output. Front literals are prepended to your output, and back literals are appended to it. The default between literal is `,`. The between literal replaces `,` as the list delimiter.
 
-Once `#`, `=`, or `"` are read, the literals are done.
+Once `#`, `=`, `$`, or `"` are read, the literals are done.
 
 ### Default Input
 

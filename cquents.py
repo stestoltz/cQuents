@@ -24,7 +24,7 @@ MOD = "%"
 # &= | \"<>
 
 SEPARATOR = ","
-LITERALSEPARATOR = "|"
+META_SEPARATOR = "|"
 LPAREN = "("
 RPAREN = ")"
 
@@ -70,11 +70,19 @@ class Builtins:
                 to_check += 2
 
     def root(self, inter, node):
-        try:
-            root = inter.visit(node.parameters[1])
-        except IndexError:
+        if len(node.parameters) == 1:
             return math.sqrt(inter.visit(node.parameters[0]))
-        return inter.visit(node.parameters[0]) ** (1 / root)
+        return inter.visit(node.parameters[0]) ** (1 / inter.visit(node.parameters[1]))
+
+    def log(self, inter, node):
+        if len(node.parameters) == 1:
+            return math.log(inter.visit(node.parameters[0]))
+        base = inter.visit(node.parameters[1])
+        if base == 10:
+            math.log10(inter.visit(node.parameters[0]))
+        elif base == 2:
+            math.log2(inter.visit(node.parameters[0]))
+        return math.log(inter.visit(node.parameters[0]), base)
 
 
 builtin_helper = Builtins()
@@ -84,9 +92,11 @@ builtins = {
     "c": lambda inter, node: math.ceil(inter.visit(node.parameters[0])),
     "f": lambda inter, node: math.factorial(inter.visit(node.parameters[0])),
     "F": lambda inter, node: math.floor(inter.visit(node.parameters[0])),
+    "l": lambda inter, node: builtin_helper.log(inter, node),
     "p": lambda inter, node: builtin_helper.next_prime(inter.visit(node.parameters[0])),
     "r": lambda inter, node: builtin_helper.root(inter, node),
     "\\c": lambda inter, node: math.cos(inter.visit(node.parameters[0])),
+    "\\l": lambda inter, node: math.log10(inter.visit(node.parameters[0])),
     "\\s": lambda inter, node: math.sin(inter.visit(node.parameters[0])),
     "\\t": lambda inter, node: math.tan(inter.visit(node.parameters[0]))
 }
@@ -120,8 +130,8 @@ class Sequence:
         self.statement_index = 0
         self.sequence = []
 
-    def __getitem__(self, i_):
-        return self.sequence[i_]
+    def __getitem__(self, index):
+        return self.sequence[index]
 
     def __iter__(self):
         self.current = 0
@@ -208,7 +218,7 @@ class Lexer:
                 return Token(PARAM, param)
             elif self.cur == "|":
                 self.advance()
-                return Token(LITERALSEPARATOR, "|")
+                return Token(META_SEPARATOR, "|")
 
         if self.param_found:
             if self.cur == "." or is_one_int.match(self.cur):
@@ -374,12 +384,12 @@ class Parser:
 
         lit_index = 0
 
-        while (self.token.type == LITERAL and lit_index <= 2) or (self.token.type == LITERALSEPARATOR and lit_index < 2):
+        while (self.token.type == LITERAL and lit_index <= 2) or (self.token.type == META_SEPARATOR and lit_index < 2):
             if self.token.type == LITERAL:
                 literals[lit_index] += self.token.val
                 self.eat(LITERAL)
-            elif self.token.type == LITERALSEPARATOR:
-                self.eat(LITERALSEPARATOR)
+            elif self.token.type == META_SEPARATOR:
+                self.eat(META_SEPARATOR)
                 lit_index += 1
 
         default_input = [], []
@@ -426,8 +436,8 @@ class Parser:
         inc = 0
 
         while inc <= 1:
-            if self.token.type == LITERALSEPARATOR and inc == 0:
-                self.eat(LITERALSEPARATOR)
+            if self.token.type == META_SEPARATOR and inc == 0:
+                self.eat(META_SEPARATOR)
                 inc += 1
             elif inc == 1:
                 break
@@ -436,7 +446,7 @@ class Parser:
 
             if self.token.type == SEPARATOR:
                 self.eat(SEPARATOR)
-            elif self.token.type != LITERALSEPARATOR:
+            elif self.token.type != META_SEPARATOR:
                 break
 
         return items
@@ -733,15 +743,15 @@ if user_input == ['']:
     user_input = []
 
 if user_input is not []:
-    for i in range(len(user_input)):
-        item = user_input[i]
+    for input_index in range(len(user_input)):
+        item = user_input[input_index]
         try:
-            user_input[i] = Number(Token(NUMBER, int(item)))
+            user_input[input_index] = Number(Token(NUMBER, int(item)))
         except ValueError:
             try:
-                user_input[i] = Number(Token(NUMBER, float(item)))
+                user_input[input_index] = Number(Token(NUMBER, float(item)))
             except ValueError:
-                user_input[i] = Number(Token(LITERAL, item))
+                user_input[input_index] = Number(Token(LITERAL, item))
 
 # print(user_input)
 
