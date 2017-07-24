@@ -1,6 +1,7 @@
 import re
 import math
 import sys
+import oeis
 
 LITERAL = "LITERAL"
 LITERAL_ESCAPE = "@"
@@ -103,8 +104,10 @@ class Builtins:
             math.log2(inter.visit(node.parameters[0]))
         return math.log(inter.visit(node.parameters[0]), base)
 
-    def get_line(self, node, lines_, index):
-        return lines_[index].interpreter.interpret(node.parameters)
+    def get_line(self, origin_interpreter, node, lines_, index):
+        next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in node.parameters]
+
+        return lines_[index].interpreter.interpret(next_parameters)
 
 
 builtin_helper = Builtins()
@@ -120,25 +123,22 @@ builtins = {
     "\\c": lambda inter, node: math.cos(inter.visit(node.parameters[0])),
     "\\l": lambda inter, node: math.log10(inter.visit(node.parameters[0])),
     "\\s": lambda inter, node: math.sin(inter.visit(node.parameters[0])),
-    "\\t": lambda inter, node: math.tan(inter.visit(node.parameters[0])),
-    # functions for other lines
-    "\\0": lambda inter, node: builtin_helper.get_line(node, lines, 0),
-    "\\1": lambda inter, node: builtin_helper.get_line(node, lines, 1),
-    "\\2": lambda inter, node: builtin_helper.get_line(node, lines, 2),
-    "\\3": lambda inter, node: builtin_helper.get_line(node, lines, 3),
-    "\\4": lambda inter, node: builtin_helper.get_line(node, lines, 4),
-    "\\5": lambda inter, node: builtin_helper.get_line(node, lines, 5),
-    "\\6": lambda inter, node: builtin_helper.get_line(node, lines, 6),
-    "\\7": lambda inter, node: builtin_helper.get_line(node, lines, 7),
-    "\\8": lambda inter, node: builtin_helper.get_line(node, lines, 8),
-    "\\9": lambda inter, node: builtin_helper.get_line(node, lines, 9)
+    "\\t": lambda inter, node: math.tan(inter.visit(node.parameters[0]))
 }
 
-OEIS = {
-    "A000001": lambda inter, node: 1
-}
+# functions for other lines
+builtins.update({EXTRA_BUILTINS_START + str(line_number): lambda inter, node, line_number=line_number: builtin_helper.get_line(inter, node, lines, line_number) for line_number in range(10)})
 
-builtins.update(OEIS)
+
+def get_OEIS(origin_interpreter, parameters, cq_source):
+    tree = get_tree(cq_source)[0]
+    tester = Tester()
+    tester.visit(tree)
+    interpreter = HelperInterpreter(tree, tester.max_input)
+    next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in parameters]
+    return interpreter.interpret(next_parameters)
+
+builtins.update({sequence: lambda inter, node, sequence=sequence: get_OEIS(inter, node.parameters, oeis.OEIS[sequence]) for sequence in oeis.OEIS})
 
 constants = {
     "e": math.e,
@@ -209,6 +209,9 @@ class Token:
 
     def can_multiply(self):
         return self.type in (NUMBER, ID, BUILTIN, LPAREN, CONSTANT)
+
+    def __str__(self):
+        return "<Token: " + self.type + " " + str(self.val) + ">"
 
 
 class Lexer:
@@ -297,6 +300,7 @@ class Lexer:
             return temp
         elif self.cur == NEWLINE:
             self.advance()
+            self.reset()
             return Token(NEWLINE, NEWLINE)
         else:
             if self.cur is not None:
@@ -354,6 +358,15 @@ class Lexer:
             return ""
 
         return self.text[self.pos + 1]
+
+    def reset(self):
+        try:
+            self.cur = self.text[self.pos]
+        except IndexError:
+            self.cur = None
+
+        self.param_found = False
+        self.mode = None
 
 
 class Parser:
@@ -607,6 +620,8 @@ class Interpreter(NodeVisitor):
         self.join = SEPARATOR
 
     def visit_Program(self, node):
+        do_prints = not isinstance(self, HelperInterpreter)
+
         default_input_length = len(node.input_front) + len(node.input_back)
         user_input_length = len(self.input)
 
@@ -642,7 +657,8 @@ class Interpreter(NodeVisitor):
         self.current_inc = self.visit(node.current_start[1]) if len(node.current_start) >= 2 else 1
 
         # starting literals
-        print(node.literals[0], end="")
+        if do_prints:
+            print(node.literals[0], end="")
 
         if n is None:
             query_n = False
@@ -666,7 +682,10 @@ class Interpreter(NodeVisitor):
                 if node.mode == SEQUENCE_1:
                     if query_n:
                         if n == self.current:
-                            print(val, end="")
+                            if do_prints:
+                                print(val, end="")
+                            else:
+                                return val
                             break
                     else:
                         print(val, end=self.join)
@@ -684,11 +703,16 @@ class Interpreter(NodeVisitor):
 
                     if query_n:
                         if n == self.current:
-                            print(sum_, end="")
+                            if do_prints:
+                                print(sum_, end="")
+                            else:
+                                return sum_
                             break
                     # elif sum_ == previous_sum
 
                 elif node.mode == QUERY:
+                    # TODO: integrate with \# functions when `if` is implemented
+
                     if query_n:
                         if n == val:
                             print("true", end="")
@@ -704,7 +728,8 @@ class Interpreter(NodeVisitor):
 
                 self.current += self.current_inc
 
-        print(node.literals[2], end="")
+        if do_prints:
+            print(node.literals[2], end="")
 
     def visit_BinOp(self, node):
         left = self.visit(node.left)
@@ -741,9 +766,14 @@ class Interpreter(NodeVisitor):
 
     def interpret(self, input_):
         self.input = input_
+
         if self.tree is None:
             return None
         return self.visit(self.tree)
+
+
+class HelperInterpreter(Interpreter):
+    pass
 
 
 class Line:
@@ -776,6 +806,9 @@ class Program(AST):
         self.statements = statements
         self.is_stringed = params.is_stringed
 
+    def __str__(self):
+        return "<Program: " + ",".join([str(x) for x in self.statements]) + ">"
+
 
 class BinOp(AST):
     def __init__(self, left, op, right):
@@ -783,10 +816,16 @@ class BinOp(AST):
         self.op = op
         self.right = right
 
+    def __str__(self):
+        return "<BinOp: " + str(self.op) + " " + str(self.left) + " " + str(self.right) + ">"
+
 
 class Constant(AST):
     def __init__(self, name):
         self.name = name
+
+    def __str__(self):
+        return "<Constant: " + self.name + ">"
 
 
 class Builtin(AST):
@@ -794,11 +833,17 @@ class Builtin(AST):
         self.builtin = builtin
         self.parameters = parameters
 
+    def __str__(self):
+        return "<Builtin: " + self.builtin + " " + ",".join([str(x) for x in self.parameters]) + ">"
+
 
 class UnaryOp(AST):
     def __init__(self, op, expr):
         self.op = op
         self.expr = expr
+
+    def __str__(self):
+        return "<UnaryOp: " + str(self.op) + " " + str(self.expr) + ">"
 
 
 class Var(AST):
@@ -806,11 +851,17 @@ class Var(AST):
         self.token = token
         self.name = token.val
 
+    def __str__(self):
+        return "<Var: " + str(self.token) + " " + self.name + ">"
+
 
 class Number(AST):
     def __init__(self, token):
         self.token = token
         self.value = token.val
+
+    def __str__(self):
+        return "<Number: " + str(self.token) + " " + str(self.value) + ">"
 
 try:
     file = sys.argv[1]
@@ -824,25 +875,28 @@ source = open(file).read()
 # print(source)
 
 
+def get_input_item_tree(item):
+    try:
+        return Number(Token(NUMBER, int(item)))
+    except ValueError:
+        try:
+            return Number(Token(NUMBER, float(item)))
+        except ValueError:
+            return Number(Token(LITERAL, item))
+
+
 def get_input():
     try:
         input_ = input().split(" ")
-    except EOFError:
-        input_ = []
 
-    if input_ == ['']:
+        if input_ == ['']:
+            input_ = []
+    except EOFError:
         input_ = []
 
     if input_ is not []:
         for input_index in range(len(input_)):
-            item = input_[input_index]
-            try:
-                input_[input_index] = Number(Token(NUMBER, int(item)))
-            except ValueError:
-                try:
-                    input_[input_index] = Number(Token(NUMBER, float(item)))
-                except ValueError:
-                    input_[input_index] = Number(Token(LITERAL, item))
+            input_[input_index] = get_input_item_tree(input_[input_index])
 
     return input_
 
@@ -853,10 +907,14 @@ user_input = get_input()
 lines = []
 
 
-def run(cq_source, cq_input):
+def get_tree(cq_source):
     lexer = Lexer(cq_source)
     parser = Parser(lexer)
-    programs = parser.parse()
+    return parser.parse()
+
+
+def run(cq_source, cq_input):
+    programs = get_tree(cq_source)
 
     first = True
     for program in programs:
@@ -869,7 +927,9 @@ def run(cq_source, cq_input):
                 run(":" + cq_source, cq_input)
                 return
 
-        interpreter = Interpreter(program, tester.max_input)
+            interpreter = Interpreter(program, tester.max_input)
+        else:
+            interpreter = HelperInterpreter(program, tester.max_input)
 
         lines.append(Line(program, interpreter))
 
