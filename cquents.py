@@ -37,6 +37,7 @@ DIV = "/"
 INT_DIV = "//"
 EXPONENT = "^"
 MOD = "%"
+E = "e"
 
 SEPARATOR = ","
 META_SEPARATOR = "|"
@@ -156,7 +157,8 @@ binary_ops = {
     DIV: lambda x, y: x / y,
     INT_DIV: lambda x, y: x // y,
     EXPONENT: lambda x, y: x ** y,
-    MOD: lambda x, y: x % y
+    MOD: lambda x, y: x % y,
+    E: lambda x, y: x * (10 ** y)
 }
 
 
@@ -278,7 +280,7 @@ class Lexer:
                 temp = self.cur + "0" * (6 - len(temp)) + temp
                 self.advance()
                 return Token(BUILTIN, temp)
-            elif self.cur in (PLUS, MINUS, MUL, DIV, EXPONENT, MOD, LPAREN, RPAREN, SEPARATOR):
+            elif self.cur in (PLUS, MINUS, MUL, DIV, EXPONENT, MOD, E, LPAREN, RPAREN, SEPARATOR):
                 if self.cur == DIV and self.peek() == DIV:
                     self.advance()
                     self.advance()
@@ -374,7 +376,7 @@ class Parser:
         self.lexer = lexer_
         self.token = self.lexer.read_token()
 
-        self.operations_1 = (EXPONENT,)
+        self.operations_1 = (EXPONENT, E)
         self.operations_2 = (MUL, DIV, INT_DIV, MOD)
         self.operations_3 = (MINUS, PLUS)
 
@@ -569,23 +571,12 @@ class NodeVisitor:
 class Tester(NodeVisitor):
     def __init__(self):
         self.max_input = -1
-        self.mode = None
 
     def generic_visit(self, node):
         pass
 
     def visit_Program(self, node):
-        self.mode = node.mode
-
-        for each in node.current_start:
-            self.visit(each)
-        for each in node.start:
-            self.visit(each)
-        for each in node.input_front:
-            self.visit(each)
-        for each in node.input_back:
-            self.visit(each)
-        for each in node.statements:
+        for each in node.current_start + node.start + node.input_front + node.input_back + node.statements:
             self.visit(each)
 
     def visit_BinOp(self, node):
@@ -914,7 +905,11 @@ def get_tree(cq_source):
 
 
 def run(cq_source, cq_input):
-    programs = get_tree(cq_source)
+    try:
+        programs = get_tree(cq_source)
+    except SyntaxError:
+        # allows for default mode
+        programs = get_tree(":" + cq_source)
 
     first = True
     for program in programs:
@@ -923,9 +918,6 @@ def run(cq_source, cq_input):
 
         if first:
             first = False
-            if tester.mode is None:
-                run(":" + cq_source, cq_input)
-                return
 
             interpreter = Interpreter(program, tester.max_input)
         else:
