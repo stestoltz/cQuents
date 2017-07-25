@@ -20,7 +20,8 @@ Heavily influenced by https://ruslanspivak.com/lsbasi-part1/
      - [Sequence Start](https://github.com/stestoltz/cQuents#sequence-start)
      - [Starting Index](https://github.com/stestoltz/cQuents#starting-index)
      - [Stringify](https://github.com/stestoltz/cQuents#stringify)
-- [Examples](https://github.com/stestoltz/cQuents#examples)
+   - [Multiline](https://github.com/stestoltz/cQuents#mulitline)
+   - [Examples](https://github.com/stestoltz/cQuents#examples)
 
 # Basic Tutorial
 
@@ -74,6 +75,7 @@ The following variables are currently valid identifiers:
 | ---- | ---- | ------ | -----------
 | Container | Parentheses | `(`code`)`\* | Acts like usual mathematical parentheses: surrounds a group of code and elevates it in the order of operations
 | Binary | Exponentation | `^` | Returns the left side to the power of the right side
+| Binary | Scientific | `e` | Returns the left side times ten to the power of the right side
 | Binary | Addition | `+` | Adds the left side to the right side
 | Binary | Subtraction | `-` | Subtracts the right side from the left side
 | Binary | Multiplication | `*`, implicit | Multiplies the left side by the right side; can be used implicitly, as in Algebra: `2z`, `2(1+$)`
@@ -94,13 +96,23 @@ Builtin function are called with their identifier, a comma-delimited list of the
 | Ceiling | `c` | 1 | Returns the ceil of the first parameter
 | Factorial | `f` | 1 | Returns the factorial (`!`) of the first parameter
 | Floor | `F` | 1 | Returns the floor of the first parameter
-| Logarithm | `l` | 1 or 2 | If there is no second parameter, returns the natural logarithm (base `e` logarithm) of the first parameter. Otherwise, returns the base [second-parameter] logarithm of the first parameter.
+| OEIS | `O<index><letter>` | 1? | Returns the item in the index of the first parameter in the OEIS sequence `<letter><possible leading zeroes><index>`, if implemented (see `oeis.py`)
+| Logarithm | `l` | 1 or 2 | If there is no second parameter, returns the natural logarithm (base `e` logarithm) of the first parameter. Otherwise, returns the base [second-parameter] logarithm of the first parameter
+| Multiline | `\0` to `\9` | 1 to many | Returns the result of the cQuents program at the (0-based) index of the function, with the function parameters passed as input to it
 | Next Prime | `p` | 1 | Returns the next prime **after** the first parameter
 | Root | `r` | 1 or 2 | If there is no second parameter, returns the square root of the first parameter. Otherwise, returns the first parameter to the power of the reciprocal of the second parameter
 | Cosine | `\c` | 1 | Returns the cos of the first parameter
 | Logarithm 2 | `\l` | 1 | Returns the base `10` logarithm of the first parameter
 | Sine | `\s` | 1 | Returns the sin of the first parameter
 | Tangent | `\t` | 1 | Returns the tan of the first parameter
+
+**Multiline Builtins**
+
+`\0` to `\9` call the cQuents program on the (0-indexed) line with the input given and return its output.
+
+**OEIS**
+
+Currently, there are plans for cQuents to have a dictionary of some OEIS sequences (stored as cQuents generator programs) which can be called as builtin functions. For those sequences currently implemented (see `oeis.py` for a full list), the sequence can be called with the function `O#A`, where `#` is the sequence index with all leading zeroes removed, and `A` is the alphabetic letter preceding the sequence (as of 7/24/2017 all OEIS sequences use `A`, but once the numeric index recents, the assumption is that it will start at `B`). Pass this function the (usually 1-based) index you want in the sequence - see its line in `oeis.py` for details on exactly how it is implemented in cQuents.
 
 ## Parameters
 
@@ -133,6 +145,12 @@ The default input can be split in two with `|`. The list on the left side of `|`
 ### Stringify
 
 `"` signifies that if the final sequence will be treated list a string instead of a list. Instead of getting the `n`th term in the list, the interpreter concatenate the list together and return the `n`th char in the string. Alternatively, instead of printing the list delimited by `,`s, it prints the list as a string without delimiter, unless the between literal is specified.
+
+## Multiline
+
+You can include multiple cQuents programs in one file, on different lines. The program on the first line is the main program, which is called when the interpreter is executed. It outputs to STDOUT. You can reference other programs by using the builtin functions `\0` to `\9`, which call the cQuents program on the (0-indexed) line, passing the input to that cQuents program. Functions `\0` to `\9` output by returning to the main program - they do **not** output to STDOUT.
+
+As a side note, be wary of your multiline indexing when using literal newlines (before the mode) as they may mess up your internal indexing. A literal newline will not affect multiline parsing or indexing.
 
 # Examples
 
