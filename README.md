@@ -1,7 +1,7 @@
 # cQuents
 WIP Language for sequences and series. May change at any time.
 
-Heavily influenced by https://ruslanspivak.com/lsbasi-part1/
+Lexer/parser/interpreter code originally from [this very helpful tutorial](https://ruslanspivak.com/lsbasi-part1/), but it was heavily modified since then.
 
 # Table of Contents
 
@@ -14,12 +14,12 @@ Heavily influenced by https://ruslanspivak.com/lsbasi-part1/
       - [Constants](https://github.com/stestoltz/cQuents#constants)
       - [Operations](https://github.com/stestoltz/cQuents#operations)
       - [Builtins](https://github.com/stestoltz/cQuents#builtins)
-   - [Parameters](https://github.com/stestoltz/cQuents#parameters)
-     - [Literals](https://github.com/stestoltz/cQuents#literals)
-     - [Default Input](https://github.com/stestoltz/cQuents#default-input)
-     - [Sequence Start](https://github.com/stestoltz/cQuents#sequence-start)
-     - [Starting Index](https://github.com/stestoltz/cQuents#starting-index)
-     - [Stringify](https://github.com/stestoltz/cQuents#stringify)
+    - [Parameters](https://github.com/stestoltz/cQuents#parameters)
+      - [Literals](https://github.com/stestoltz/cQuents#literals)
+      - [Default Input](https://github.com/stestoltz/cQuents#default-input)
+      - [Sequence Start](https://github.com/stestoltz/cQuents#sequence-start)
+      - [Starting Index](https://github.com/stestoltz/cQuents#starting-index)
+      - [Stringify](https://github.com/stestoltz/cQuents#stringify)
    - [Multiline](https://github.com/stestoltz/cQuents#mulitline)
    - [Examples](https://github.com/stestoltz/cQuents#examples)
 

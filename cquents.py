@@ -105,11 +105,14 @@ class Builtins:
             math.log2(inter.visit(node.parameters[0]))
         return math.log(inter.visit(node.parameters[0]), base)
 
-    def get_line(self, origin_interpreter, node, lines_, index):
+    def get_line(self, origin_interpreter, node, index):
         next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in node.parameters]
 
-        return lines_[index].interpreter.interpret(next_parameters)
+        return origin_interpreter.lines[index].interpreter.interpret(next_parameters)
 
+    def get_OEIS(self, origin_interpreter, parameters, cq_source):
+        next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in parameters]
+        return run(cq_source, next_parameters, is_oeis=True)
 
 builtin_helper = Builtins()
 
@@ -128,18 +131,10 @@ builtins = {
 }
 
 # functions for other lines
-builtins.update({EXTRA_BUILTINS_START + str(line_number): lambda inter, node, line_number=line_number: builtin_helper.get_line(inter, node, lines, line_number) for line_number in range(10)})
+builtins.update({EXTRA_BUILTINS_START + str(line_number): lambda inter, node, line_number=line_number: builtin_helper.get_line(inter, node, line_number) for line_number in range(10)})
 
-
-def get_OEIS(origin_interpreter, parameters, cq_source):
-    tree = get_tree(cq_source)[0]
-    tester = Tester()
-    tester.visit(tree)
-    interpreter = HelperInterpreter(tree, tester.max_input)
-    next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in parameters]
-    return interpreter.interpret(next_parameters)
-
-builtins.update({sequence: lambda inter, node, sequence=sequence: get_OEIS(inter, node.parameters, oeis.OEIS[sequence]) for sequence in oeis.OEIS})
+#FIXME: Global lines object causes bugs when doing this
+builtins.update({sequence: lambda inter, node, sequence=sequence: builtin_helper.get_OEIS(inter, node.parameters, oeis.OEIS[sequence]) for sequence in oeis.OEIS})
 
 constants = {
     "e": math.e,
@@ -599,10 +594,11 @@ class Tester(NodeVisitor):
 
 
 class Interpreter(NodeVisitor):
-    def __init__(self, tree_, max_input):
+    def __init__(self, tree_, max_input, lines_):
         self.tree = tree_
         self.input = None
         self.max_input = max_input
+        self.lines = lines_
 
         self.sequence = None
         self.current = 1
@@ -895,8 +891,6 @@ user_input = get_input()
 
 # print(user_input)
 
-lines = []
-
 
 def get_tree(cq_source):
     lexer = Lexer(cq_source)
@@ -904,7 +898,9 @@ def get_tree(cq_source):
     return parser.parse()
 
 
-def run(cq_source, cq_input):
+def run(cq_source, cq_input, is_oeis=False):
+    lines = []
+
     try:
         programs = get_tree(cq_source)
     except SyntaxError:
@@ -916,15 +912,15 @@ def run(cq_source, cq_input):
         tester = Tester()
         tester.visit(program)
 
-        if first:
+        if not is_oeis and first:
             first = False
 
-            interpreter = Interpreter(program, tester.max_input)
+            interpreter = Interpreter(program, tester.max_input, lines)
         else:
-            interpreter = HelperInterpreter(program, tester.max_input)
+            interpreter = HelperInterpreter(program, tester.max_input, lines)
 
         lines.append(Line(program, interpreter))
 
-    lines[0].interpreter.interpret(cq_input)
+    return lines[0].interpreter.interpret(cq_input)
 
 run(source, user_input)
