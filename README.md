@@ -25,6 +25,8 @@ Lexer/parser/interpreter code originally from [this very helpful tutorial](https
 
 # Basic Tutorial
 
+##### Note that this tutorial may be out of date - see commands.txt for a more up-to-date list of commands
+
 ## Input
 
 Input is currently given as a space delimited list of numbers. Your program will can query the input (for more explanation, see **Sequence Definition.Terms.Numbers and Variables**, as well as **Parameters.Default Input**). The interpreter will check how deep into the input you query. The last input is optional, and occurs after all other input is allocated to the interpreter from your queries. `n` is used in different ways by different modes, and is `1`-indexed. `n`s existance determines your program's functionality, based on the mode.

@@ -1,0 +1,152 @@
+----------| Formats
+
+-----| Program Format
+[[literals][parameters]<mode>]<sequence>
+
+-----| Literal Format
+[literals][|join[|backliterals]]
+
+-----| Parameter Formats
+[$|=][arg[,arg]...]
+["]
+[#][frontinput[,frontinput]...][|[backinput[,backinput]...]]
+
+-----| Sequence Format
+<item>[,item]
+
+-----| Input
+input = frontinput + userinput + backinput
+Input is expected if the input fetchers (A-E) are used in the program. If there is an extra input afterwards, it is called n. If the input lengths do not match up, an error occurs.
+
+-----| Function Format
+<name>[parameter[, parameter]...][)]
+
+----------| Characters
+
+-----| Literal Selectors
+ @   | Escapes the next character as a string literal
+ '   | Quote to capture string literals
+ 
+-----| Parameters (see format above)
+ #   | Default Input: adds input to the user's
+ =   | Sequence Start: specifies the first terms of the sequence
+ $   | Starting Index: specifies the start index (default is 1)
+ "   | Stringify: join on empty string, treat n as index in string, not in list
+
+-----| Modes
+ :   | Sequence 1: If n, output the nth term. Otherwise, output the whole sequence
+ ::  | Sequence 2: If n, output the sequence up to and including the nth term. Otherwise, TODO
+ ;   | Series: If n, output the sum of the sequence up to and including n. Otherwise, TODO (output convergent sum of sequence)
+ ?   | Query: If there is n, output true if n is in the sequence, and false if n is not in the sequence. (Currently assumes strictly increasing). Otherwise, ignore sequence.
+ 
+-----| Numbers
+Numbers are formed using . and 0-9 as would be expected. Use negation (-) for negative numbers.
+
+-----| Variables
+ $   | Current index in sequence
+ n   | Target: n as defined above, if given
+ A   | First input:     input[0]
+ B   | Second input:    input[1]
+ C   | Third input:     input[2]
+ D   | Fourth input:    input[3]
+ E   | Fifth input:     input[4]
+ z   | Previous item in sequence: sequence[-1] || 0
+ y   | Second previous item in sequence: sequence[-2] || 0
+ x   | Third previous item in sequence: sequence[-3] || 0
+ w   | Fourth previous item in sequence: sequence[-4] || 0
+ v   | Fifth previous item in sequence: sequence[-5] || 0
+ 
+-----| Operators
+ %   | Modulus:          x % y
+ *   | Multiplication:   x * y
+ +   | Addition:         x + y
+ -   | Negation: -x; Subtraction: x - y
+ /   | Division:         x / y
+ //  | Integer (floor) division: x // y
+ ^   | Exponent:         x ^ y
+ e   | Scientific Notation: x e y
+
+-----| Functions
+ a   | Absolute value:   ax)
+ c   | Ceil:             cx)
+ l   | Logarithm:        lx[,y]) (default y: _e)
+ f   | Factorial:        fx)
+ F   | Floor:            Fx)
+ O   | OEIS:             O<seqNum><seqLetter>x)
+ p   | Next Prime (exclusive): px)
+ r   | Root:             rx[,y]) (default y: 2)
+ \c  | Cosine:           \cx)
+ \l  | Log 10:           lx)
+ \s  | Sine:             \sx)
+ \t  | Tangent:          \tx)
+ 
+ \0  | Run First Line:   \0x)
+ \1  | Run Second Line:  \1x)
+ \2  | Run Third Line:   \2x)
+ \3  | Run Fourth Line:  \3x)
+ \4  | Run Fifth Line:   \4x)
+ \5  | Run Sixth Line:   \5x)
+ \6  | Run Seventh Line: \6x)
+ \7  | Run Eighth Line:  \7x)
+ \8  | Run Ninth Line:   \8x)
+ \9  | Run Tenth Line:   \9x)
+
+-----| Constants
+ _e  | e: Base of the natural logarithm
+ _p  | pi: Circumference divided by diameter in a perfect circle
+
+-----| Miscellaneous (after mode specified)
+ \n  | (Literal newline) start new program on next line; can be called with \0 to \9
+' '  | (Space) 
+ !   |
+ "   |
+ #   |
+ &   |
+ (   | Opening parenthesis.
+ )   | Closing parenthesis for functions or opening parenthsis. Can be left off of program if before EOF or newline.
+ ,   | Argument separator for functions and items in the sequence
+ :   |
+ ;   |
+ <   |
+ =   |
+ >   |
+ ?   |
+ G   |
+ H   |
+ I   |
+ J   |
+ K   |
+ L   |
+ M   |
+ N   |
+ P   |
+ Q   |
+ R   |
+ S   |
+ T   |
+ U   |
+ V   |
+ W   |
+ X   |
+ Y   |
+ Z   |
+ [   |
+ ]   |
+ `   |
+ b   |
+ d   |
+ g   |
+ h   |
+ i   |
+ j   |
+ k   |
+ m   |
+ o   |
+ q   |
+ s   |
+ t   |
+ u   |
+ {   |
+ |   |
+ }   |
+ ~   |

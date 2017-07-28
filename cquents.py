@@ -50,7 +50,7 @@ NEWLINE = "\n"
 # &= | \"<>
 
 is_one_int = re.compile("^[0-9]$")
-is_id = re.compile("^[$v-zA-E]$")
+is_id = re.compile("^[$nv-zA-E]$")
 is_input_id = re.compile("^[A-E]$")
 is_previous_id = re.compile("^[v-z]$")
 
@@ -600,6 +600,7 @@ class Interpreter(NodeVisitor):
         self.max_input = max_input
         self.lines = lines_
 
+        self.n = None
         self.sequence = None
         self.current = 1
         self.current_inc = 1
@@ -650,7 +651,7 @@ class Interpreter(NodeVisitor):
         if n is None:
             query_n = False
         else:
-            n = self.visit(n)
+            self.n = n = self.visit(n)
             query_n = n == 0 or n
 
         if node.is_stringed:
@@ -739,6 +740,8 @@ class Interpreter(NodeVisitor):
     def visit_Var(self, node):
         if node.name == CURRENT:
             return self.current
+        if node.name == "n":
+            return self.n
         elif is_previous_id.match(node.name):
             try:
                 temp = self.sequence[-1 + ord(node.name) - 122]
