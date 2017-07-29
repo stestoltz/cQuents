@@ -136,7 +136,6 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  I   |
  J   |
  K   |
- L   |
  M   |
  N   |
  P   |
