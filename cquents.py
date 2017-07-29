@@ -32,12 +32,27 @@ STRINGED = '"'
 
 PLUS = "+"
 MINUS = "-"
+CONCAT = "~"
 MUL = "*"
 DIV = "/"
 INT_DIV = "//"
 EXPONENT = "^"
 MOD = "%"
 E = "e"
+
+EXTRA_OPS = "b"
+BITWISE_NOT = "b~"
+BITWISE_OR = "b|"
+BITWISE_NOR = "bn"
+BITWISE_XOR = "b^"
+BITWISE_XNOR = "bx"
+BITWISE_AND = "b&"
+BITWISE_NAND = "bN"
+BITWISE_LEFT = "b<"
+BITWISE_RIGHT = "b>"
+
+STRING_LEFT = "b-"
+STRING_RIGHT = "b+"
 
 SEPARATOR = ","
 META_SEPARATOR = "|"
@@ -90,20 +105,20 @@ class Builtins:
 
                 to_check += 2
 
-    def root(self, inter, node):
-        if len(node.parameters) == 1:
-            return math.sqrt(inter.visit(node.parameters[0]))
-        return inter.visit(node.parameters[0]) ** (1 / inter.visit(node.parameters[1]))
+    def root(self, origin_interpreter, parameters):
+        if len(parameters) == 1:
+            return math.sqrt(origin_interpreter.visit(parameters[0]))
+        return origin_interpreter.visit(parameters[0]) ** (1 / origin_interpreter.visit(parameters[1]))
 
-    def log(self, inter, node):
-        if len(node.parameters) == 1:
-            return math.log(inter.visit(node.parameters[0]))
-        base = inter.visit(node.parameters[1])
+    def log(self, origin_interpreter, parameters):
+        if len(parameters) == 1:
+            return math.log(origin_interpreter.visit(parameters[0]))
+        base = origin_interpreter.visit(parameters[1])
         if base == 10:
-            math.log10(inter.visit(node.parameters[0]))
+            math.log10(origin_interpreter.visit(parameters[0]))
         elif base == 2:
-            math.log2(inter.visit(node.parameters[0]))
-        return math.log(inter.visit(node.parameters[0]), base)
+            math.log2(origin_interpreter.visit(parameters[0]))
+        return math.log(origin_interpreter.visit(parameters[0]), base)
 
     def get_line(self, origin_interpreter, node, index):
         next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in node.parameters]
@@ -114,6 +129,86 @@ class Builtins:
         next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in parameters]
         return run(cq_source, next_parameters, is_oeis=True)
 
+    def concat(self, x, y):
+        # what to do with negatives/floats?
+        res = str(x) + str(y)
+        if type(x) is type(y) is int and y > 0:
+            return int(res)
+
+        raise CQConcatError("Error concatenating " + str(type(x)) + ":" + str(x) + " and " + str(type(y)) + ":" + str(y))
+
+    def length(self, origin_interpreter, parameters):
+        str_ = str(origin_interpreter.visit(parameters[0]))
+
+        str_ = str_.replace("-", "")
+        if len(parameters) == 1:
+            str_ = str_.replace(".", "")
+
+        return len(str_)
+
+    def fill(self, origin_interpreter, parameters):
+        # ??
+        pass
+
+    def reverse(self, origin_interpreter, parameters):
+        num = origin_interpreter.visit(parameters[0])
+        is_negative = num < 0
+        type_ = type(num)
+        keep_dot_position = len(parameters) == 1
+
+        if type_ == int:
+            str_ = str(int(math.fabs(num)))
+        else:
+            str_ = str(math.fabs(num))
+
+        dot_index = str_.find(".")
+
+        if ~dot_index and keep_dot_position:
+            str_ = str_.replace(".", "")
+
+        str_ = str_[::-1]
+
+        if ~dot_index:
+            if keep_dot_position:
+                str_ = str_[:dot_index] + "." + str_[dot_index:]
+
+            res = float(str_)
+        else:
+            res = int(str_)
+
+        return -res if is_negative else res
+
+    def rotate(self, origin_interpreter, parameters):
+        return self.primitive_rotate(origin_interpreter.visit(parameters[0]), origin_interpreter.visit(parameters[1]), len(parameters) <= 2)
+
+    #https://stackoverflow.com/a/8458282/7605753
+    def primitive_rotate(self, num, rotation, keep_dot_position = True):
+        is_negative = num < 0
+        type_ = type(num)
+
+        if type_ == int:
+            str_ = str(int(math.fabs(num)))
+        else:
+            str_ = str(math.fabs(num))
+
+        dot_index = str_.find(".")
+
+        if ~dot_index and keep_dot_position:
+            str_ = str_.replace(".", "")
+
+        rotation = rotation % len(str_)
+        str_ = str_[-rotation:] + str_[:-rotation]
+
+        if ~dot_index:
+            if keep_dot_position:
+                str_ = str_[:dot_index] + "." + str_[dot_index:]
+
+            res = float(str_)
+        else:
+            res = int(str_)
+
+        return -res if is_negative else res
+
 builtin_helper = Builtins()
 
 builtins = {
@@ -121,11 +216,16 @@ builtins = {
     "c": lambda inter, node: math.ceil(inter.visit(node.parameters[0])),
     "f": lambda inter, node: math.factorial(inter.visit(node.parameters[0])),
     "F": lambda inter, node: math.floor(inter.visit(node.parameters[0])),
-    "l": lambda inter, node: builtin_helper.log(inter, node),
+    "l": lambda inter, node: builtin_helper.log(inter, node.parameters),
+    "L": lambda inter, node: builtin_helper.length(inter, node.parameters),
     "p": lambda inter, node: builtin_helper.next_prime(inter.visit(node.parameters[0])),
-    "r": lambda inter, node: builtin_helper.root(inter, node),
+    "r": lambda inter, node: builtin_helper.root(inter, node.parameters),
+    "R": lambda inter, node: round(inter.visit(node.parameters[0])),
     "\\c": lambda inter, node: math.cos(inter.visit(node.parameters[0])),
+    #"\\f": lambda inter, node: builtin_helper.fill(inter, node.parameters),
     "\\l": lambda inter, node: math.log10(inter.visit(node.parameters[0])),
+    "\\r": lambda inter, node: builtin_helper.reverse(inter, node.parameters),
+    "\\R": lambda inter, node: builtin_helper.rotate(inter, node.parameters),
     "\\s": lambda inter, node: math.sin(inter.visit(node.parameters[0])),
     "\\t": lambda inter, node: math.tan(inter.visit(node.parameters[0]))
 }
@@ -142,18 +242,31 @@ constants = {
 }
 
 unary_ops = {
-    MINUS: lambda x: -x
+    MINUS: lambda x: -x,
+    PLUS: lambda x: +x,
+    BITWISE_NOT: lambda x: ~x,
+    STRING_LEFT: lambda x: builtin_helper.primitive_rotate(x, -1),
+    STRING_RIGHT: lambda x: builtin_helper.primitive_rotate(x, 1)
 }
 
 binary_ops = {
     PLUS: lambda x, y: x + y,
     MINUS: lambda x, y: x - y,
+    CONCAT: lambda x, y: builtin_helper.concat(x, y),
     MUL: lambda x, y: x * y,
     DIV: lambda x, y: x / y,
     INT_DIV: lambda x, y: x // y,
     EXPONENT: lambda x, y: x ** y,
     MOD: lambda x, y: x % y,
-    E: lambda x, y: x * (10 ** y)
+    E: lambda x, y: x * (10 ** y),
+    BITWISE_OR: lambda x, y: x | y,
+    BITWISE_NOR: lambda x, y: ~(x | y),
+    BITWISE_XOR: lambda x, y: x ^ y,
+    BITWISE_XNOR: lambda x, y: ~(x ^ y),
+    BITWISE_AND: lambda x, y: x & y,
+    BITWISE_NAND: lambda x, y: ~(x & y),
+    BITWISE_LEFT: lambda x, y: x << y,
+    BITWISE_RIGHT: lambda x, y: x >> y
 }
 
 
@@ -193,6 +306,26 @@ class Sequence:
             return int(self.interpreter.join.join([str(x) for x in self.sequence])[self.current - 1])
 
         return cur_val
+
+
+class CQError(Exception):
+    pass
+
+
+class CQSyntaxError(CQError):
+    pass
+
+
+class CQInputError(CQError):
+    pass
+
+
+class CQInternalError(CQError):
+    pass
+
+
+class CQConcatError(CQError):
+    pass
 
 
 def get_input_val(char):
@@ -275,11 +408,17 @@ class Lexer:
                 temp = self.cur + "0" * (6 - len(temp)) + temp
                 self.advance()
                 return Token(BUILTIN, temp)
-            elif self.cur in (PLUS, MINUS, MUL, DIV, EXPONENT, MOD, E, LPAREN, RPAREN, SEPARATOR):
-                if self.cur == DIV and self.peek() == DIV:
+            elif self.cur in (PLUS, MINUS, CONCAT, MUL, DIV, EXPONENT, MOD, E, EXTRA_OPS, LPAREN, RPAREN, SEPARATOR):
+                if self.cur + self.peek() == INT_DIV:
                     self.advance()
                     self.advance()
                     return Token(INT_DIV, INT_DIV)
+                elif self.cur == EXTRA_OPS:
+                    to_test = self.cur + self.peek()
+                    if to_test in binary_ops or to_test in unary_ops:
+                        self.advance()
+                        self.advance()
+                        return Token(to_test, to_test)
 
                 temp = self.cur
                 self.advance()
@@ -305,7 +444,7 @@ class Lexer:
                 self.advance()
                 return Token(LITERAL, temp)
 
-        # raise SyntaxError("Unknown character found : " + self.cur)
+        # raise CQError("Unknown character found : " + self.cur)
 
     def advance(self):
         self.pos += 1
@@ -371,9 +510,15 @@ class Parser:
         self.lexer = lexer_
         self.token = self.lexer.read_token()
 
-        self.operations_1 = (EXPONENT, E)
-        self.operations_2 = (MUL, DIV, INT_DIV, MOD)
-        self.operations_3 = (MINUS, PLUS)
+        self.operations = [
+            (BITWISE_OR, BITWISE_NOR),
+            (BITWISE_XOR, BITWISE_XNOR),
+            (BITWISE_AND, BITWISE_NAND),
+            (BITWISE_LEFT, BITWISE_RIGHT),
+            (MINUS, PLUS, CONCAT),
+            (MUL, DIV, INT_DIV, MOD),
+            (EXPONENT, E)
+        ]
 
     def eat(self, type_):
         if self.token.type == type_:
@@ -382,7 +527,7 @@ class Parser:
             if type_ == EOF or type_ == RPAREN and self.token.type in (EOF, NEWLINE):
                 return
 
-            raise SyntaxError("Incorrect token found: looking for " + type_ + ", found " + self.token.type + " | " + self.token.val + " at " + self.lexer.pos)
+            raise CQSyntaxError("Incorrect token found: looking for " + type_ + ", found " + self.token.type + " | " + self.token.val + " at " + self.lexer.pos)
 
     def parse(self):
         lines_ = [self.program()]
@@ -479,15 +624,54 @@ class Parser:
         return node
 
     def expr(self):
-        # get first term
-        node = self.term()
+        node = self.op_0()
 
         # valid 3rd priority operations
-        while self.token.type in self.operations_3:
+        while self.token.type in self.operations[0]:
             tok = self.token
 
             self.eat(tok.type)
 
+            node = BinOp(node, tok, self.op_0())
+
+        return node
+
+    def op_0(self):
+        node = self.op_1()
+
+        while self.token.type in self.operations[1]:
+            tok = self.token
+            self.eat(tok.type)
+            node = BinOp(node, tok, self.op_1())
+
+        return node
+
+    def op_1(self):
+        node = self.op_2()
+
+        while self.token.type in self.operations[2]:
+            tok = self.token
+            self.eat(tok.type)
+            node = BinOp(node, tok, self.op_2())
+
+        return node
+
+    def op_2(self):
+        node = self.op_3()
+
+        while self.token.type in self.operations[3]:
+            tok = self.token
+            self.eat(tok.type)
+            node = BinOp(node, tok, self.op_3())
+
+        return node
+
+    def op_3(self):
+        node = self.term()
+
+        while self.token.type in self.operations[-3]:
+            tok = self.token
+            self.eat(tok.type)
             node = BinOp(node, tok, self.term())
 
         return node
@@ -497,7 +681,7 @@ class Parser:
         node = self.short_term()
 
         # valid 2nd priority operations
-        while self.token.type in self.operations_2 or self.token.can_multiply():
+        while self.token.type in self.operations[-2] or self.token.can_multiply():
             tok = self.token
 
             if tok.can_multiply():
@@ -514,7 +698,7 @@ class Parser:
         node = self.factor()
 
         # valid 1st priority operations
-        while self.token.type in self.operations_1:
+        while self.token.type in self.operations[-1]:
             tok = self.token
 
             self.eat(tok.type)
@@ -526,10 +710,9 @@ class Parser:
     def factor(self):
         tok = self.token
 
-        if tok.type == MINUS:
-            self.eat(MINUS)
-            node = UnaryOp(tok, self.factor())
-            return node
+        if tok.type in unary_ops:
+            self.eat(tok.type)
+            return UnaryOp(tok, self.factor())
         elif tok.type == NUMBER:
             self.eat(NUMBER)
             return Number(tok)
@@ -550,7 +733,7 @@ class Parser:
         elif tok.type == ID:
             return self.variable()
 
-        raise SyntaxError("Unknown factor : " + (tok.val or tok.type))
+        raise CQSyntaxError("Unknown factor : " + (tok.val or tok.type))
 
 
 class NodeVisitor:
@@ -560,7 +743,7 @@ class NodeVisitor:
         return visitor(node)
 
     def generic_visit(self, node):
-        raise ValueError("No visit_" + type(node).__name__ + " method")
+        raise CQInternalError("No visit_" + type(node).__name__ + " method")
 
 
 class Tester(NodeVisitor):
@@ -635,7 +818,7 @@ class Interpreter(NodeVisitor):
 
             # print(self.input)
         else:
-            raise ValueError("Incorrect input length")
+            raise CQInputError("Incorrect input length")
 
         # TODO: Do different if mode == QUERY
 
@@ -904,11 +1087,11 @@ def get_tree(cq_source):
 def run(cq_source, cq_input, is_oeis=False):
     lines = []
 
-    try:
-        programs = get_tree(cq_source)
-    except SyntaxError:
+    #try:
+    programs = get_tree(cq_source)
+    #except CQSyntaxError:
         # allows for default mode
-        programs = get_tree(":" + cq_source)
+        #programs = get_tree(":" + cq_source)
 
     first = True
     for program in programs:

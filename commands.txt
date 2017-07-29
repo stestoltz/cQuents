@@ -55,28 +55,48 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  x   | Third previous item in sequence: sequence[-3] || 0
  w   | Fourth previous item in sequence: sequence[-4] || 0
  v   | Fifth previous item in sequence: sequence[-5] || 0
+
+-----| Unary Operators
+ +   | Plus:             +x
+ -   | Negation:         -x
+ b~  | Bitwise invert:   b~x
+ b-  | Rotate left:      b-x
+ b+  | Rotate right:     b+x
  
 -----| Operators
- %   | Modulus:          x % y
- *   | Multiplication:   x * y
- +   | Addition:         x + y
- -   | Negation: -x; Subtraction: x - y
- /   | Division:         x / y
- //  | Integer (floor) division: x // y
- ^   | Exponent:         x ^ y
- e   | Scientific Notation: x e y
+ %   | Modulus:          x%y
+ *   | Multiplication:   x*y
+ +   | Addition:         x+ 
+ -   | Subtraction:      x-y
+ /   | Division:         x/y
+ //  | Integer (floor) division: x//y
+ ^   | Exponent:         x^y
+ ~   | Concatenation:    x~y
+ e   | Scientific Notation: xey
+ b|  | Bitwise or:       xb|y
+ bn  | Bitwise nor:      xbny
+ b^  | Bitwise xor:      xb^y
+ bx  | Bitwise xnor:     xbny
+ b&  | Bitwise and:      xb&y
+ bN  | Bitwise nand:     xbNy
+ b<  | Bitwise left shift: xb<y
+ b>  | Bitwise right shift: xb>y
 
 -----| Functions
  a   | Absolute value:   ax)
  c   | Ceil:             cx)
  l   | Logarithm:        lx[,y]) (default y: _e)
+ L   | Length:           Lx[,y]) (if y exists, include "." in count)
  f   | Factorial:        fx)
  F   | Floor:            Fx)
  O   | OEIS:             O<seqNum><seqLetter>x)
  p   | Next Prime (exclusive): px)
  r   | Root:             rx[,y]) (default y: 2)
+ R   | Round:            Rx)
  \c  | Cosine:           \cx)
  \l  | Log 10:           lx)
+ \r  | Rotate:           \rx,y[,z]) (+y goes right, -y goes left) (if z exists, move ".")
+ \R  | Reverse:          \Rx[,y]) (if y exists, include "." in reversal)
  \s  | Sine:             \sx)
  \t  | Tangent:          \tx)
  
@@ -121,7 +141,6 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  N   |
  P   |
  Q   |
- R   |
  S   |
  T   |
  U   |
