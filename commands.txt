@@ -95,8 +95,8 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  R   | Round:            Rx)
  \c  | Cosine:           \cx)
  \l  | Log 10:           lx)
- \r  | Rotate:           \rx,y[,z]) (+y goes right, -y goes left) (if z exists, move ".")
- \R  | Reverse:          \Rx[,y]) (if y exists, include "." in reversal)
+ \r  | Reverse:          \rx[,y]) (if y exists, include "." in reversal)
+ \R  | Rotate:           \Rx,y[,z]) (+y goes right, -y goes left) (if z exists, move ".")
  \s  | Sine:             \sx)
  \t  | Tangent:          \tx)
  
