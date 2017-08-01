@@ -93,6 +93,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  p   | Next Prime (exclusive): px)
  r   | Root:             rx[,y]) (default y: 2)
  R   | Round:            Rx)
+ X   | Exp:              Xx)
  \c  | Cosine:           \cx)
  \l  | Log 10:           lx)
  \r  | Reverse:          \rx[,y]) (if y exists, include "." in reversal)
@@ -112,8 +113,15 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  \9  | Run Tenth Line:   \9x)
 
 -----| Constants
+ _c  | Catalan's constant: Sum of 1/1^2 - 1/3^2 + 1/5^2 - 1/7^2 + ...
  _e  | e: Base of the natural logarithm
+ _g  | Golden Ratio: .5 * (sqrt(5) + 1)
+ _G  | Glaisher-Kinkelin constant
+ _k  | Khinchin's constant
  _p  | pi: Circumference divided by diameter in a perfect circle
+ _y  | Euler-Mascheroni constant: limiting difference between the harmonic series and the natural logarithm
+ 
+ #TODO: GCD, LCM, toBase, more trig functions, 
 
 -----| Miscellaneous (after mode specified)
  \n  | (Literal newline) start new program on next line; can be called with \0 to \9
@@ -131,12 +139,12 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  =   |
  >   |
  ?   |
- G   |
+ G   | #GCD
  H   |
  I   |
  J   |
  K   |
- M   |
+ M   | #LCM
  N   |
  P   |
  Q   |
@@ -145,13 +153,11 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  U   |
  V   |
  W   |
- X   |
  Y   |
  Z   |
  [   |
  ]   |
  `   |
- b   |
  d   |
  g   |
  h   |

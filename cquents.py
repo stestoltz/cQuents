@@ -221,6 +221,7 @@ builtins = {
     "p": lambda inter, node: builtin_helper.next_prime(inter.visit(node.parameters[0])),
     "r": lambda inter, node: builtin_helper.root(inter, node.parameters),
     "R": lambda inter, node: round(inter.visit(node.parameters[0])),
+    "X": lambda inter, node: math.exp(inter.visit(node.parameters[0])),
     "\\c": lambda inter, node: math.cos(inter.visit(node.parameters[0])),
     #"\\f": lambda inter, node: builtin_helper.fill(inter, node.parameters),
     "\\l": lambda inter, node: math.log10(inter.visit(node.parameters[0])),
@@ -237,8 +238,13 @@ builtins.update({EXTRA_BUILTINS_START + str(line_number): lambda inter, node, li
 builtins.update({sequence: lambda inter, node, sequence=sequence: builtin_helper.get_OEIS(inter, node.parameters, oeis.OEIS[sequence]) for sequence in oeis.OEIS})
 
 constants = {
+    "c": 0.915965594177219,
     "e": math.e,
-    "p": math.pi
+    "g": .5 * (math.sqrt(5) + 1),
+    "G": 0.128242712910062,
+    "k": 0.268545200106530,
+    "p": math.pi,
+    "y": 0.577215664901532
 }
 
 unary_ops = {
@@ -1087,11 +1093,11 @@ def get_tree(cq_source):
 def run(cq_source, cq_input, is_oeis=False):
     lines = []
 
-    #try:
-    programs = get_tree(cq_source)
-    #except CQSyntaxError:
+    try:
+        programs = get_tree(cq_source)
+    except CQSyntaxError:
         # allows for default mode
-        #programs = get_tree(":" + cq_source)
+        programs = get_tree(":" + cq_source)
 
     first = True
     for program in programs:
