@@ -22,7 +22,9 @@ MODE = "MODE"
 SEQUENCE_1 = ":"
 SEQUENCE_2 = "::"
 SERIES = ";"
+CLOSEST = ";;"
 QUERY = "?"
+NOT_QUERY = "??"
 
 PARAM = "PARAM"
 CURRENT = "$"
@@ -374,8 +376,8 @@ class Lexer:
                 self.param_found = True
                 self.advance()
 
-                if self.mode == self.cur == SEQUENCE_1:
-                    self.mode += SEQUENCE_1
+                if self.mode == self.cur:
+                    self.mode += self.cur
                     self.advance()
 
                 return Token(MODE, self.mode)
@@ -848,7 +850,7 @@ class Interpreter(NodeVisitor):
         else:
             self.join = node.literals[1] or SEPARATOR
 
-        if node.mode in (SEQUENCE_2, QUERY) and not query_n:
+        if node.mode in (SEQUENCE_2, QUERY, NOT_QUERY) and not query_n:
             pass
 
         else:
@@ -887,12 +889,15 @@ class Interpreter(NodeVisitor):
                             break
                     # elif sum_ == previous_sum
 
-                elif node.mode == QUERY:
+                elif node.mode in (QUERY, NOT_QUERY):
                     # TODO: integrate with \# functions when `if` is implemented
+
+                    if_in = "true" if node.mode == QUERY else "false"
+                    if_out = "false" if node.mode == QUERY else "true"
 
                     if query_n:
                         if n == val:
-                            print("true", end="")
+                            print(if_in, end="")
                             break
                         # elif previous and cur_val < previous:
                         #     print("false", end="")
@@ -900,7 +905,7 @@ class Interpreter(NodeVisitor):
 
                         # TODO: FIXME
                         elif val > n:
-                            print("false", end="")
+                            print(if_out, end="")
                             break
 
                 self.current += self.current_inc

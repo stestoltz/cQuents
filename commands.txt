@@ -38,6 +38,8 @@ Input is expected if the input fetchers (A-E) are used in the program. If there 
  ::  | Sequence 2: If n, output the sequence up to and including the nth term. Otherwise, TODO
  ;   | Series: If n, output the sum of the sequence up to and including n. Otherwise, TODO (output convergent sum of sequence)
  ?   | Query: If there is n, output true if n is in the sequence, and false if n is not in the sequence. (Currently assumes strictly increasing). Otherwise, ignore sequence.
+ ??  | Reverse Query: Same as query, but with outputs swapped.
+ ;;  | TODO: Closest
  
 -----| Numbers
 Numbers are formed using . and 0-9 as would be expected. Use negation (-) for negative numbers.
