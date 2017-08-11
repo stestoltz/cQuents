@@ -1,6 +1,8 @@
 import re
 import math
 import sys
+import itertools
+
 import oeis
 
 LITERAL = "LITERAL"
@@ -74,11 +76,24 @@ is_previous_id = re.compile("^[v-z]$")
 
 class Builtins:
     def __init__(self):
-        self.primes = [2, 3, 5, 7]
+        self.primes = [2]
+        self.prime_gen = self.gen_primes()
+
+    # http://www.macdevcenter.com/pub/a/python/excerpt/pythonckbk_chap1/index1.html?page=2
+    def gen_primes(self):
+        D = {}
+        for q in itertools.islice(itertools.count(3), 0, None, 2):
+            p = D.pop(q, None)
+            if p is None:
+                D[q * q] = q
+                yield q
+            else:
+                x = p + q
+                while x in D or not (x & 1):
+                    x += p
+                D[x] = p
 
     def next_prime(self, n):
-
-        # TODO: better algorithm
 
         if self.primes[-1] > n:
             index = len(self.primes) - 1
@@ -86,26 +101,14 @@ class Builtins:
                 index -= 1
 
             return self.primes[index + 1]
+
         else:
-            to_check = self.primes[-1] + 2
-
             while True:
-                is_prime = True
+                nxt = next(self.prime_gen)
 
-                j = 1
-                while j < len(self.primes) and self.primes[j] < int(math.ceil(n / 3 + 1)):
-                    if to_check % self.primes[j] == 0:
-                        is_prime = False
-                        break
-
-                    j += 1
-
-                if is_prime:
-                    self.primes.append(to_check)
-                    if to_check > n:
-                        return to_check
-
-                to_check += 2
+                self.primes.append(nxt)
+                if nxt > n:
+                    return nxt
 
     def root(self, origin_interpreter, parameters):
         if len(parameters) == 1:
