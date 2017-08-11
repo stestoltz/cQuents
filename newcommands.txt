@@ -1,0 +1,254 @@
+μ FUNCTION: average
+η FUNCTION: median
+Δ VAR: difference between last two items in sequence
+↑ BINOP: knuth arrow / tetration
+≺ UNARYOP: rotate left one
+≻ UNARYOP: rotate right one
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+½ VAR:  .5
+⅓ VAR:  .3...
+¼ VAR:  .25
+⅒ VAR:  .1
+⅟ UNARYOP:  1/
+√ FUNCTION: sqrt
+∛ FUNCTION: cube root
+∜ FUNCTION: fourth root
+∨ BINOP: logical and
+∧ BINOP: logical or
+« BINOP: left shift
+¬ UNARYOP: logical not
+» BINOP: right shift
+⨽ BINOP: log
+₊ PUNARYOP: inc
+₋ PUNARYOP: dec
+ No-op
+! PUNARYOP: factorial
+" CONTAINER: compressed string
+# UNARYOP: convert to num
+$ UNARYOP: convert to string
+% BINOP: mod
+& BINOP: bitwise and
+' CONTAINER: strings
+( CONTAINER: paren
+) CONTAINER: paren
+* BINOP: exponent
++ BINOP: addition
+, separator
+- BINOP: minus
+. decimal separator
+/ BINOP: fraction bar (lower precendence than division)
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+: MODE: sequence 1
+;
+< BINOP: less than
+= BINOP: equal to
+> BINOP: greater than
+? ternary
+@
+A VAR: input[0]
+B VAR: input[1]
+C VAR: input[2]
+D VAR: input list
+E
+F
+G FUNCTION: GCD
+H
+I BINOP: intdiv
+J
+K
+L FUNCTION: length
+M FUNCTION: max
+N
+O FUNCTION: OEIS
+P FUNCTION: partitions
+Q
+R FUNCTION: round
+S FUNCTION: sum
+T
+U
+V
+W
+X FUNCTION: exp
+Y
+Z
+[ index
+\ escape
+] index
+^ BINOP: bitwise xor
+_ constants
+`
+a FUNCTION: abs
+b FUNCTION: to base (def 2)
+c FUNCTION: ceil
+d FUNCTION: proper divisors (discluding n)
+e
+f FUNCTION: floor
+g
+h
+i BINOP: in
+j
+k
+l UNARYOP: length
+m FUNCTION: min
+n VARIABLE: target (as inputed)
+o
+p FUNCTION: next prime
+q
+r FUNCTION: nth root
+s UNARYOP: sum
+t
+u
+v
+w VAR: a list
+x VAR: a[-3]
+y VAR: a[-2]
+z VAR: a[-1]
+{ nested seq
+| BINOP: bitwise or
+} nested seq
+~ bitwise not
+\n line separator
+⁰
+¹
+² PUNARYOP: squared
+³ PUNARYOP: cubed
+⁴ PUNARYOP: to the fourth power
+⁵
+⁶
+⁷
+⁸
+⁹
+⁻ to the -1 power or to the -x power
+⟨
+¿ ternary
+⟩
+÷ BINOP: divide
+× BINOP: multiply
+₀
+₁ 1st line
+₂ 2nd line
+₃ 3rd line
+₄
+₅
+₆
+₇
+₈
+₉
+𝕏 VAR: 10
+ℂ VAR: 100
+𝕄 VAR: 1000
+⦗
+· BINOP: concat
+⦘
+∑ MODE: sum
+∏ MODE: product
+∈ MODE: is in?
+∉ MODE: is not in?
+σ FUNCTION: divisors
+φ FUNCTION: positive ints up to n that a relatively prime to n
+ω FUNCTION: unique prime factors
+Ω FUNCTION: all prime factors
+≤ BINOP: less than or equal to
+≠ BINOP: not equal to
+≥ BINOP: greater than or equal to
+Ạ
+Ḅ
+Ḍ
+Ẹ
+Ḥ
+Ị
+Ḳ
+Ḷ FUNCTION: LCM
+Ṃ
+Ṇ
+Ọ
+Ṛ FUNCTION: reverse
+Ṣ
+Ṭ
+Ụ
+Ṿ
+Ẉ
+Ỵ
+Ẓ
+Ȧ
+Ḃ
+Ċ FUNCTION: cosine
+Ḋ
+Ė
+Ḟ
+Ġ
+Ḣ
+İ
+Ŀ
+Ṁ
+Ṅ
+Ȯ
+Ṗ FUNCTION: is palindrome
+Ṙ FUNCTION: rotate
+Ṡ FUNCTION: sine
+Ṫ FUNCITON: tangent
+Ẇ
+Ẋ
+Ẏ
+Ż
+ạ
+ḅ
+ḍ FUNCTION: difference
+ẹ
+ḥ
+ị
+ḳ
+ḷ FUNCTION: ln
+ṃ
+ṇ
+ọ
+ṛ FUNCTION: repeat (python: str * int)
+ṣ
+ṭ
+ụ
+ṿ
+ẉ
+ỵ
+ẓ
+ȧ
+ḃ
+ċ FUNCTION: arccos
+ḋ
+ė
+ḟ
+ġ
+ḣ
+ŀ
+ṁ
+ṅ
+ȯ
+ṗ
+ṙ
+ṡ FUNCTION: arcsin
+ṫ FUNCTION: arctan
+ẇ
+ẋ
+ẏ
+ż
+…
+⋯
+⋮ MODE: sequence 2
+∫
+Ξ FUNCTION: get line
+𝔼 BINOP: times 10 to the power of
