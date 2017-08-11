@@ -4,7 +4,7 @@
 ↑ BINOP: knuth arrow / tetration
 ≺ UNARYOP: rotate left one
 ≻ UNARYOP: rotate right one
- 
+🙸 third level separator
  
  
  
@@ -55,7 +55,7 @@ $ UNARYOP: convert to string
 8
 9
 : MODE: sequence 1
-;
+; second level separator
 < BINOP: less than
 = BINOP: equal to
 > BINOP: greater than
@@ -70,7 +70,7 @@ F
 G FUNCTION: GCD
 H
 I BINOP: intdiv
-J
+J FUNCTION: numbers not yet in sequence, smallest to largest
 K FUNCTION: n choose k; or, combinations
 L FUNCTION: length
 M FUNCTION: max
@@ -102,7 +102,7 @@ f FUNCTION: floor
 g
 h
 i BINOP: in
-j
+j VAR: smallest positive num not yet in sequence
 k VAR: current index in sequence
 l UNARYOP: length
 m FUNCTION: min
