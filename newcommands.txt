@@ -71,7 +71,7 @@ G FUNCTION: GCD
 H
 I BINOP: intdiv
 J
-K
+K FUNCTION: n choose k; or, combinations
 L FUNCTION: length
 M FUNCTION: max
 N
@@ -103,7 +103,7 @@ g
 h
 i BINOP: in
 j
-k
+k VAR: current index in sequence
 l UNARYOP: length
 m FUNCTION: min
 n VARIABLE: target (as inputed)
