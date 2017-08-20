@@ -96,7 +96,7 @@ _ constants
 a FUNCTION: abs
 b FUNCTION: to base (def 2)
 c FUNCTION: ceil
-d FUNCTION: proper divisors (discluding n)
+d FUNCTION: digits
 e
 f FUNCTION: floor
 g
@@ -169,7 +169,7 @@ z VAR: a[-1]
 ≥ BINOP: greater than or equal to
 Ạ
 Ḅ
-Ḍ
+Ḍ FUNCTION: proper divisors (discluding n)
 Ẹ
 Ḥ
 Ị

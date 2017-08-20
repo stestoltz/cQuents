@@ -1,35 +1,49 @@
+import builtins as builtin_helper
 import re
 import math
 import sys
-import itertools
 
 import oeis
 
-LITERAL = "LITERAL"
-LITERAL_ESCAPE = "@"
-LITERAL_QUOTE = "'"
+codepage  = """μηΔ↑≺≻🙸         """
+codepage += """½⅓¼⅒⅟√∛∜∨∧«¬»⨽₊₋"""
+codepage += """ !"#$%&'()*+,-./"""
+codepage += """0123456789:;<=>?"""
+codepage += """@ABCDEFGHIJKLMNO"""
+codepage += """PQRSTUVWXYZ[\\]^_"""
+codepage += """`abcdefghijklmno"""
+codepage += """pqrstuvwxyz{|}~\n"""
+codepage += """⁰¹²³⁴⁵⁶⁷⁸⁹⁻⟨¿⟩÷×"""
+codepage += """₀₁₂₃₄₅₆₇₈₉𝕏ℂ𝕄⦗·⦘"""
+codepage += """∑∏∈∉σφωΩ≤≠≥ẠḄḌẸḤ"""
+codepage += """ỊḲḶṂṆỌṚṢṬỤṾẈỴẒȦḂ"""
+codepage += """ĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆ"""
+codepage += """ẊẎŻạḅḍẹḥịḳḷṃṇọṛṣ"""
+codepage += """ṭụṿẉỵẓȧḃċḋėḟġḣŀṁ"""
+codepage += """ṅȯṗṙṡṫẇẋẏż…⋯⋮∫Ξ𝔼"""
 
+LITERAL = "LITERAL"
 NUMBER = "NUMBER"
 EOF = "EOF"
 ID = "ID"
-
 BUILTIN = "BUILTIN"
-EXTRA_BUILTINS_START = "\\"
-OEIS_START = "O"
-
 CONSTANT = "CONSTANT"
-CONSTANT_START = "_"
-
 MODE = "MODE"
-SEQUENCE_1 = ":"
+PARAM = "PARAM"
+OPERATOR = "OPERATOR"
+SEPARATOR = "SEPARATOR"
+
+MODES = []
+PARAMS = []
+SEPARATORS = []
+"""SEQUENCE_1 = ":"
 SEQUENCE_2 = "::"
 SERIES = ";"
 CLOSEST = ";;"
 QUERY = "?"
-NOT_QUERY = "??"
+NOT_QUERY = "??" """
 
-PARAM = "PARAM"
-CURRENT = "$"
+"""CURRENT = "$"
 START = "="
 DEFAULT_INPUT = "#"
 STRINGED = '"'
@@ -62,11 +76,7 @@ SEPARATOR = ","
 META_SEPARATOR = "|"
 LPAREN = "("
 RPAREN = ")"
-NEWLINE = "\n"
-
-# ~`!  # _{}[]?:;
-
-# &= | \"<>
+NEWLINE = "\n" """
 
 is_one_int = re.compile("^[0-9]$")
 is_id = re.compile("^[$nv-zA-E]$")
@@ -74,150 +84,20 @@ is_input_id = re.compile("^[A-E]$")
 is_previous_id = re.compile("^[v-z]$")
 
 
-class Builtins:
-    def __init__(self):
-        self.primes = [2]
-        self.prime_gen = self.gen_primes()
+def get_line(self, origin_interpreter, node, index):
+    next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in node.parameters]
 
-    # http://www.macdevcenter.com/pub/a/python/excerpt/pythonckbk_chap1/index1.html?page=2
-    def gen_primes(self):
-        D = {}
-        for q in itertools.islice(itertools.count(3), 0, None, 2):
-            p = D.pop(q, None)
-            if p is None:
-                D[q * q] = q
-                yield q
-            else:
-                x = p + q
-                while x in D or not (x & 1):
-                    x += p
-                D[x] = p
+    return origin_interpreter.lines[index].interpreter.interpret(next_parameters)
 
-    def next_prime(self, n):
 
-        if self.primes[-1] > n:
-            index = len(self.primes) - 1
-            while index >= 0 and self.primes[index] > n:
-                index -= 1
+def get_OEIS(self, origin_interpreter, parameters, cq_source):
+    next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in parameters]
+    return run(cq_source, next_parameters, is_oeis=True)
 
-            return self.primes[index + 1]
-
-        else:
-            while True:
-                nxt = next(self.prime_gen)
-
-                self.primes.append(nxt)
-                if nxt > n:
-                    return nxt
-
-    def root(self, origin_interpreter, parameters):
-        if len(parameters) == 1:
-            return math.sqrt(origin_interpreter.visit(parameters[0]))
-        return origin_interpreter.visit(parameters[0]) ** (1 / origin_interpreter.visit(parameters[1]))
-
-    def log(self, origin_interpreter, parameters):
-        if len(parameters) == 1:
-            return math.log(origin_interpreter.visit(parameters[0]))
-        base = origin_interpreter.visit(parameters[1])
-        if base == 10:
-            math.log10(origin_interpreter.visit(parameters[0]))
-        elif base == 2:
-            math.log2(origin_interpreter.visit(parameters[0]))
-        return math.log(origin_interpreter.visit(parameters[0]), base)
-
-    def get_line(self, origin_interpreter, node, index):
-        next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in node.parameters]
-
-        return origin_interpreter.lines[index].interpreter.interpret(next_parameters)
-
-    def get_OEIS(self, origin_interpreter, parameters, cq_source):
-        next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in parameters]
-        return run(cq_source, next_parameters, is_oeis=True)
-
-    def concat(self, x, y):
-        # what to do with negatives/floats?
-        res = str(x) + str(y)
-        if type(x) is type(y) is int and y > 0:
-            return int(res)
-
-        raise CQConcatError("Error concatenating " + str(type(x)) + ":" + str(x) + " and " + str(type(y)) + ":" + str(y))
-
-    def length(self, origin_interpreter, parameters):
-        str_ = str(origin_interpreter.visit(parameters[0]))
-
-        str_ = str_.replace("-", "")
-        if len(parameters) == 1:
-            str_ = str_.replace(".", "")
-
-        return len(str_)
-
-    def fill(self, origin_interpreter, parameters):
-        # ??
-        pass
-
-    def reverse(self, origin_interpreter, parameters):
-        num = origin_interpreter.visit(parameters[0])
-        is_negative = num < 0
-        type_ = type(num)
-        keep_dot_position = len(parameters) == 1
-
-        if type_ == int:
-            str_ = str(int(math.fabs(num)))
-        else:
-            str_ = str(math.fabs(num))
-
-        dot_index = str_.find(".")
-
-        if ~dot_index and keep_dot_position:
-            str_ = str_.replace(".", "")
-
-        str_ = str_[::-1]
-
-        if ~dot_index:
-            if keep_dot_position:
-                str_ = str_[:dot_index] + "." + str_[dot_index:]
-
-            res = float(str_)
-        else:
-            res = int(str_)
-
-        return -res if is_negative else res
-
-    def rotate(self, origin_interpreter, parameters):
-        return self.primitive_rotate(origin_interpreter.visit(parameters[0]), origin_interpreter.visit(parameters[1]), len(parameters) <= 2)
-
-    #https://stackoverflow.com/a/8458282/7605753
-    def primitive_rotate(self, num, rotation, keep_dot_position = True):
-        is_negative = num < 0
-        type_ = type(num)
-
-        if type_ == int:
-            str_ = str(int(math.fabs(num)))
-        else:
-            str_ = str(math.fabs(num))
-
-        dot_index = str_.find(".")
-
-        if ~dot_index and keep_dot_position:
-            str_ = str_.replace(".", "")
-
-        rotation = rotation % len(str_)
-        str_ = str_[-rotation:] + str_[:-rotation]
-
-        if ~dot_index:
-            if keep_dot_position:
-                str_ = str_[:dot_index] + "." + str_[dot_index:]
-
-            res = float(str_)
-        else:
-            res = int(str_)
-
-        return -res if is_negative else res
-
-builtin_helper = Builtins()
+builtin_helper.root(1, 1)
 
 builtins = {
-    "a": lambda inter, node: math.fabs(inter.visit(node.parameters[0])),
+    "a": lambda inter, node: abs(inter.visit(node.parameters[0])),
     "c": lambda inter, node: math.ceil(inter.visit(node.parameters[0])),
     "f": lambda inter, node: math.factorial(inter.visit(node.parameters[0])),
     "F": lambda inter, node: math.floor(inter.visit(node.parameters[0])),
@@ -258,6 +138,10 @@ unary_ops = {
     BITWISE_NOT: lambda x: ~x,
     STRING_LEFT: lambda x: builtin_helper.primitive_rotate(x, -1),
     STRING_RIGHT: lambda x: builtin_helper.primitive_rotate(x, 1)
+}
+
+post_unary_ops = {
+    
 }
 
 binary_ops = {
