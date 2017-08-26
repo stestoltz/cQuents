@@ -1,4 +1,4 @@
-import builtins as builtin_helper
+import cquents_builtins as builtin_helper
 import re
 import math
 import sys
@@ -32,10 +32,14 @@ MODE = "MODE"
 PARAM = "PARAM"
 OPERATOR = "OPERATOR"
 SEPARATOR = "SEPARATOR"
+NEWLINE = "NEWLINE"
+LCONTAINER = "LCONTAINER"
+RCONTAINER = "RCONTAINER"
 
 MODES = []
 PARAMS = []
 SEPARATORS = []
+OPERATORS = []
 """SEQUENCE_1 = ":"
 SEQUENCE_2 = "::"
 SERIES = ";"
@@ -84,17 +88,15 @@ is_input_id = re.compile("^[A-E]$")
 is_previous_id = re.compile("^[v-z]$")
 
 
-def get_line(self, origin_interpreter, node, index):
+def get_line(origin_interpreter, node, index):
     next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in node.parameters]
 
     return origin_interpreter.lines[index].interpreter.interpret(next_parameters)
 
 
-def get_OEIS(self, origin_interpreter, parameters, cq_source):
+def get_OEIS(origin_interpreter, parameters, cq_source):
     next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in parameters]
     return run(cq_source, next_parameters, is_oeis=True)
-
-builtin_helper.root(1, 1)
 
 builtins = {
     "a": lambda inter, node: abs(inter.visit(node.parameters[0])),
@@ -117,10 +119,10 @@ builtins = {
 }
 
 # functions for other lines
-builtins.update({EXTRA_BUILTINS_START + str(line_number): lambda inter, node, line_number=line_number: builtin_helper.get_line(inter, node, line_number) for line_number in range(10)})
+# builtins.update({EXTRA_BUILTINS_START + str(line_number): lambda inter, node, line_number=line_number: get_line(inter, node, line_number) for line_number in range(10)})
 
 #FIXME: Global lines object causes bugs when doing this
-builtins.update({sequence: lambda inter, node, sequence=sequence: builtin_helper.get_OEIS(inter, node.parameters, oeis.OEIS[sequence]) for sequence in oeis.OEIS})
+builtins.update({sequence: lambda inter, node, sequence=sequence: get_OEIS(inter, node.parameters, oeis.OEIS[sequence]) for sequence in oeis.OEIS})
 
 constants = {
     "c": 0.915965594177219,
@@ -133,9 +135,9 @@ constants = {
 }
 
 unary_ops = {
-    MINUS: lambda x: -x,
-    PLUS: lambda x: +x,
-    BITWISE_NOT: lambda x: ~x,
+    "-": lambda x: -x,
+    "+": lambda x: +x,
+    "~": lambda x: ~x,
     STRING_LEFT: lambda x: builtin_helper.primitive_rotate(x, -1),
     STRING_RIGHT: lambda x: builtin_helper.primitive_rotate(x, 1)
 }
@@ -145,23 +147,23 @@ post_unary_ops = {
 }
 
 binary_ops = {
-    PLUS: lambda x, y: x + y,
-    MINUS: lambda x, y: x - y,
-    CONCAT: lambda x, y: builtin_helper.concat(x, y),
-    MUL: lambda x, y: x * y,
-    DIV: lambda x, y: x / y,
-    INT_DIV: lambda x, y: x // y,
-    EXPONENT: lambda x, y: x ** y,
-    MOD: lambda x, y: x % y,
-    E: lambda x, y: x * (10 ** y),
-    BITWISE_OR: lambda x, y: x | y,
+    "+": lambda x, y: x + y,
+    "-": lambda x, y: x - y,
+    "·": lambda x, y: builtin_helper.concat(x, y),
+    "×": lambda x, y: x * y,
+    "÷": lambda x, y: x / y,
+    "I": lambda x, y: x // y,
+    "*": lambda x, y: x ** y,
+    "%": lambda x, y: x % y,
+    "𝔼": lambda x, y: x * (10 ** y),
+    "|": lambda x, y: x | y,
     BITWISE_NOR: lambda x, y: ~(x | y),
-    BITWISE_XOR: lambda x, y: x ^ y,
+    "^": lambda x, y: x ^ y,
     BITWISE_XNOR: lambda x, y: ~(x ^ y),
-    BITWISE_AND: lambda x, y: x & y,
+    "&": lambda x, y: x & y,
     BITWISE_NAND: lambda x, y: ~(x & y),
-    BITWISE_LEFT: lambda x, y: x << y,
-    BITWISE_RIGHT: lambda x, y: x >> y
+    "«": lambda x, y: x << y,
+    "»": lambda x, y: x >> y
 }
 
 
@@ -250,89 +252,86 @@ class Lexer:
         except IndexError:
             self.cur = None
 
-        self.param_found = False
+        # self.param_found = False
         self.mode = None
 
     def read_token(self):
         if self.cur is None:
             return Token(EOF, "")
 
-        if not self.mode:
-            if self.cur in (SEQUENCE_1, SERIES, QUERY):
-                self.mode = self.cur
-                self.param_found = True
-                self.advance()
+        while self.cur == " ":
+            self.advance()
 
-                if self.mode == self.cur:
-                    self.mode += self.cur
-                    self.advance()
+            if self.cur is None:
+                return Token(EOF, "")
 
-                return Token(MODE, self.mode)
-            elif self.cur in (START, DEFAULT_INPUT, CURRENT, STRINGED):
-                self.param_found = True
-                param = self.cur
-                self.advance()
-                return Token(PARAM, param)
-            elif self.cur == META_SEPARATOR:
-                self.advance()
-                return Token(META_SEPARATOR, META_SEPARATOR)
+        if self.cur in MODES:
+            self.mode = self.cur
+            #self.param_found = True
+            self.advance()
+            return Token(MODE, self.mode)
 
-        if self.param_found:
-            if self.cur == "." or is_one_int.match(self.cur):
-                return self.read_number()
-            elif is_id.match(self.cur):
-                return self.read_id()
-            elif self.cur == CONSTANT_START:
-                self.advance()
-                temp = self.cur
-                self.advance()
-                return Token(CONSTANT, temp)
-            elif self.cur in builtins:
-                temp = self.cur
-                self.advance()
-                return Token(BUILTIN, temp)
-            elif self.cur == EXTRA_BUILTINS_START and self.cur + self.peek() in builtins:
-                temp = self.cur
-                self.advance()
-                temp += self.cur
-                self.advance()
-                return Token(BUILTIN, temp)
-            elif self.cur == OEIS_START:
-                self.advance()
-                temp = str(self.read_number().val)
-                temp = self.cur + "0" * (6 - len(temp)) + temp
-                self.advance()
-                return Token(BUILTIN, temp)
-            elif self.cur in (PLUS, MINUS, CONCAT, MUL, DIV, EXPONENT, MOD, E, EXTRA_OPS, LPAREN, RPAREN, SEPARATOR):
-                if self.cur + self.peek() == INT_DIV:
-                    self.advance()
-                    self.advance()
-                    return Token(INT_DIV, INT_DIV)
-                elif self.cur == EXTRA_OPS:
-                    to_test = self.cur + self.peek()
-                    if to_test in binary_ops or to_test in unary_ops:
-                        self.advance()
-                        self.advance()
-                        return Token(to_test, to_test)
+        elif self.cur in PARAMS:
+            #self.param_found = True
+            temp = self.cur
+            self.advance()
+            return Token(PARAM, temp)
 
-                temp = self.cur
-                self.advance()
-                return Token(temp, temp)
+        elif self.cur in SEPARATORS:
+            temp = self.cur
+            self.advance()
+            return Token(SEPARATOR, temp)
 
-        if self.cur == LITERAL_ESCAPE:
+        elif self.cur == "." or is_one_int.match(self.cur):
+            return self.read_number()
+
+        elif is_id.match(self.cur):
+            return self.read_id()
+
+        elif self.cur == "_":
+            self.advance()
+            temp = self.cur
+            self.advance()
+            return Token(CONSTANT, temp)
+
+        elif self.cur == "O":
+            self.advance()
+            temp = str(self.read_number().val)
+            temp = self.cur + "0" * (6 - len(temp)) + temp
+            self.advance()
+            return Token(BUILTIN, temp)
+
+        elif self.cur in builtins:
+            temp = self.cur
+            self.advance()
+            return Token(BUILTIN, temp)
+
+        elif self.cur == EXTRA_BUILTINS_START and self.cur + self.peek() in builtins:
+            temp = self.cur
+            self.advance()
+            temp += self.cur
+            self.advance()
+            return Token(BUILTIN, temp)
+
+        elif self.cur in OPERATORS:
+            temp = self.cur
+            self.advance()
+            return Token(OPERATOR, temp)
+
+        if self.cur == "\\":
             self.advance()
             temp = self.cur
             self.advance()
             return Token(LITERAL, temp)
-        elif self.cur == LITERAL_QUOTE:
+        elif self.cur == "'":
             self.advance()
             temp = self.read_literal()
             self.advance()
             return temp
-        elif self.cur == NEWLINE:
+        elif self.cur == "\n":
             self.advance()
             self.reset()
-            return Token(NEWLINE, NEWLINE)
+            return Token(NEWLINE, "\n")
         else:
             if self.cur is not None:
                 temp = self.cur
@@ -378,7 +377,7 @@ class Lexer:
     def read_literal(self):
         result = ""
 
-        while self.cur is not None and self.cur != LITERAL_QUOTE:
+        while self.cur is not None and self.cur != "'":
             result += self.cur
             self.advance()
 
@@ -396,7 +395,7 @@ class Lexer:
         except IndexError:
             self.cur = None
 
-        self.param_found = False
+        # self.param_found = False
         self.mode = None
 
 

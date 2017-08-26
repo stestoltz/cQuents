@@ -4,14 +4,14 @@
 ↑ BINOP: knuth arrow / tetration
 ≺ UNARYOP: rotate left one
 ≻ UNARYOP: rotate right one
-🙸 third level separator
- 
- 
- 
- 
- 
- 
- 
+🙸 PARAM: separator
+𝚡 PARAM: starting index
+˜ PARAM: for stringify
+† PARAM: for start of sequence
+ø PARAM: for default input
+
+𝄂 PARAM: right literals
+𝄃 PARAM: left literals
 ½ VAR:  .5
 ⅓ VAR:  .3...
 ¼ VAR:  .25
@@ -20,15 +20,15 @@
 √ FUNCTION: sqrt
 ∛ FUNCTION: cube root
 ∜ FUNCTION: fourth root
-∨ BINOP: logical and
-∧ BINOP: logical or
+∧ BINOP: logical and
+∨ BINOP: logical or
 « BINOP: left shift
 ¬ UNARYOP: logical not
 » BINOP: right shift
 ⨽ BINOP: log
 ₊ PUNARYOP: inc
 ₋ PUNARYOP: dec
- No-op
+  Eat all parens
 ! PUNARYOP: factorial
 " CONTAINER: compressed string
 # UNARYOP: convert to num
