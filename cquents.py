@@ -57,7 +57,7 @@ DEFAULT_INPUT = "#"
 STRINGED = '"'
 PARAMS = [CURRENT, START, DEFAULT_INPUT, STRINGED]
 
-LITERAL_ESCAPE = "\\"
+LITERAL_ESCAPE = "@"
 LITERAL_QUOTE = "'"
 
 PLUS = "+"
@@ -84,8 +84,10 @@ BITWISE_NAND = "bN"
 BITWISE_LEFT = "b<"
 BITWISE_RIGHT = "b>"
 
-STRING_LEFT = "b-"
-STRING_RIGHT = "b+"
+STRING_LEFT = "bl"
+STRING_RIGHT = "br"
+INCREMENT = "b+"
+DECREMENT = "b-"
 
 OEIS_START = "O"
 
@@ -159,11 +161,13 @@ unary_ops = {
     "+": lambda x: +x,
     BITWISE_NOT: lambda x: ~x,
     STRING_LEFT: lambda x: builtin_helper.primitive_rotate(x, -1),
-    STRING_RIGHT: lambda x: builtin_helper.primitive_rotate(x, 1)
+    STRING_RIGHT: lambda x: builtin_helper.primitive_rotate(x, 1),
+    INCREMENT: lambda x: x + 1,
+    DECREMENT: lambda x: x - 1
 }
 
 post_unary_ops = {
-    
+    "!": lambda x: math.factorial(x)
 }
 
 binary_ops = {
@@ -358,17 +362,18 @@ class Lexer:
             #self.advance()
             return Token(BUILTIN, self.advance() + self.advance())
 
+        elif self.cur in OPERATORS:
+            #temp = self.cur
+            #self.advance()
+            return Token(OPERATOR, self.advance())
+
         elif self.cur == EXTRA_OPS and self.cur + self.peek() in OPERATORS or self.cur + self.peek() in OPERATORS:
             #temp = self.cur
             #self.advance()
             #temp += self.cur
             #self.advance()
-            return Token(OPERATOR, self.advance() + self.advance())
 
-        elif self.cur in OPERATORS:
-            #temp = self.cur
-            #self.advance()
-            return Token(OPERATOR, self.advance())
+            return Token(OPERATOR, self.advance() + self.advance())
 
         if self.cur == LITERAL_ESCAPE:
             self.advance()
@@ -669,30 +674,37 @@ class Parser:
     def factor(self):
         tok = self.token
 
-        if tok.val in unary_ops:
-            self.eat(tok.type)
-            return UnaryOp(tok, self.factor())
+        if tok.type == OPERATOR and tok.val in unary_ops:
+            self.eat(OPERATOR)
+            node = UnaryOp(tok, self.factor())
         elif tok.type == NUMBER:
             self.eat(NUMBER)
-            return Number(tok)
+            node = Number(tok)
         elif tok.type == CONSTANT:
             self.eat(CONSTANT)
-            return Constant(tok.val)
+            node = Constant(tok.val)
         elif tok.type == LCONTAINER:
             self.eat(LCONTAINER)
             node = self.expr()
             self.eat(RCONTAINER)
-            return node
         elif tok.type == BUILTIN:
             builtin = tok.val
             self.eat(BUILTIN)
-            nodes = self.items()
+            node_list = self.items()
             self.eat(RCONTAINER)
-            return Builtin(builtin, nodes)
+            node = Builtin(builtin, node_list)
         elif tok.type == ID:
-            return self.variable()
+            node = self.variable()
+        else:
+            raise CQSyntaxError("Unknown factor : " + (tok.val or tok.type))
 
-        raise CQSyntaxError("Unknown factor : " + (tok.val or tok.type))
+        post_tok = self.token
+
+        if post_tok.type == OPERATOR and post_tok.val in post_unary_ops:
+            self.eat(OPERATOR)
+            node = PostUnaryOp(post_tok, node)
+
+        return node
 
 
 class NodeVisitor:
@@ -725,7 +737,11 @@ class Tester(NodeVisitor):
             self.visit(parameter)
 
     def visit_UnaryOp(self, node):
-        if node.op.type in unary_ops:
+        if node.op.val in unary_ops:
+            self.visit(node.expr)
+
+    def visit_PostUnaryOp(self, node):
+        if node.op.val in post_unary_ops:
             self.visit(node.expr)
 
     def visit_Var(self, node):
@@ -893,6 +909,10 @@ class Interpreter(NodeVisitor):
         if node.op.val in unary_ops:
             return unary_ops[node.op.val](self.visit(node.expr))
 
+    def visit_PostUnaryOp(self, node):
+        if node.op.val in post_unary_ops:
+            return post_unary_ops[node.op.val](self.visit(node.expr))
+
     def visit_Var(self, node):
         if node.name == CURRENT:
             return self.current
@@ -990,6 +1010,11 @@ class UnaryOp(AST):
 
     def __str__(self):
         return "<UnaryOp: " + str(self.op) + " " + str(self.expr) + ">"
+
+
+class PostUnaryOp(UnaryOp):
+    def __str__(self):
+        return "<PostUnaryOp: " + str(self.expr) + " " + str(self.op) + ">"
 
 
 class Var(AST):

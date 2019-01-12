@@ -62,8 +62,13 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  +   | Plus:             +x
  -   | Negation:         -x
  b~  | Bitwise invert:   b~x
- b-  | Rotate left:      b-x
- b+  | Rotate right:     b+x
+ bl  | Rotate left:      blx
+ br  | Rotate right:     brx
+ b+  | Add one:          b+x
+ b-  | Subtract one:     b-x
+
+-----| Post-Unary Operators
+ !   | Factorial:        x!
  
 -----| Operators
  %   | Modulus:          x%y
@@ -87,10 +92,10 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
 -----| Functions
  a   | Absolute value:   ax)
  c   | Ceil:             cx)
- l   | Logarithm:        lx[,y]) (default y: _e)
- L   | Length:           Lx[,y]) (if y exists, include "." in count)
  f   | Factorial:        fx)
  F   | Floor:            Fx)
+ l   | Logarithm:        lx[,y]) (default y: _e)
+ L   | Length:           Lx[,y]) (if y exists, include "." in count)
  O   | OEIS:             O<seqNum><seqLetter>x)
  p   | Next Prime (exclusive): px)
  r   | Root:             rx[,y]) (default y: 2)
@@ -128,17 +133,17 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
 -----| Miscellaneous (after mode specified)
  \n  | (Literal newline) start new program on next line; can be called with \0 to \9
 ' '  | (Space) 
- !   |
- "   |
- #   |
+ !   | Factorial
+ "   | (param stringify)
+ #   | (param default input)
  &   |
  (   | Opening parenthesis.
  )   | Closing parenthesis for functions or opening parenthsis. Can be left off of program if before EOF or newline.
- ,   | Argument separator for functions and items in the sequence
- :   |
- ;   |
+ ,   | item/term separator
+ :   | (mode series)
+ ;   | (mode sum), function separator
  <   |
- =   |
+ =   | (param start)
  >   |
  ?   |
  G   | #GCD
@@ -173,6 +178,6 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  t   |
  u   |
  {   |
- |   |
+ |   | (meta separator)
  }   |
- ~   |
+ ~   | concatenation
