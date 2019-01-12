@@ -5,22 +5,22 @@ import sys
 
 import oeis
 
-codepage  = """μηΔ↑≺≻🙸         """
-codepage += """½⅓¼⅒⅟√∛∜∨∧«¬»⨽₊₋"""
-codepage += """ !"#$%&'()*+,-./"""
-codepage += """0123456789:;<=>?"""
-codepage += """@ABCDEFGHIJKLMNO"""
-codepage += """PQRSTUVWXYZ[\\]^_"""
-codepage += """`abcdefghijklmno"""
-codepage += """pqrstuvwxyz{|}~\n"""
-codepage += """⁰¹²³⁴⁵⁶⁷⁸⁹⁻⟨¿⟩÷×"""
-codepage += """₀₁₂₃₄₅₆₇₈₉𝕏ℂ𝕄⦗·⦘"""
-codepage += """∑∏∈∉σφωΩ≤≠≥ẠḄḌẸḤ"""
-codepage += """ỊḲḶṂṆỌṚṢṬỤṾẈỴẒȦḂ"""
-codepage += """ĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆ"""
-codepage += """ẊẎŻạḅḍẹḥịḳḷṃṇọṛṣ"""
-codepage += """ṭụṿẉỵẓȧḃċḋėḟġḣŀṁ"""
-codepage += """ṅȯṗṙṡṫẇẋẏż…⋯⋮∫Ξ𝔼"""
+#codepage  = """μηΔ↑≺≻🙸         """
+#codepage += """½⅓¼⅒⅟√∛∜∨∧«¬»⨽₊₋"""
+#codepage += """ !"#$%&'()*+,-./"""
+#codepage += """0123456789:;<=>?"""
+#codepage += """@ABCDEFGHIJKLMNO"""
+#codepage += """PQRSTUVWXYZ[\\]^_"""
+#codepage += """`abcdefghijklmno"""
+#codepage += """pqrstuvwxyz{|}~\n"""
+#codepage += """⁰¹²³⁴⁵⁶⁷⁸⁹⁻⟨¿⟩÷×"""
+#codepage += """₀₁₂₃₄₅₆₇₈₉𝕏ℂ𝕄⦗·⦘"""
+#codepage += """∑∏∈∉σφωΩ≤≠≥ẠḄḌẸḤ"""
+#codepage += """ỊḲḶṂṆỌṚṢṬỤṾẈỴẒȦḂ"""
+#codepage += """ĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆ"""
+#codepage += """ẊẎŻạḅḍẹḥịḳḷṃṇọṛṣ"""
+#codepage += """ṭụṿẉỵẓȧḃċḋėḟġḣŀṁ"""
+#codepage += """ṅȯṗṙṡṫẇẋẏż…⋯⋮∫Ξ𝔼"""
 
 LITERAL = "LITERAL"
 NUMBER = "NUMBER"
@@ -36,21 +36,29 @@ NEWLINE = "NEWLINE"
 LCONTAINER = "LCONTAINER"
 RCONTAINER = "RCONTAINER"
 
-MODES = []
-PARAMS = []
-SEPARATORS = []
-OPERATORS = []
-"""SEQUENCE_1 = ":"
+# MODES = []
+# PARAMS = []
+# SEPARATORS = []
+# OPERATORS = []
+# LCONTAINERS = []
+# RCONTAINERS = []
+
+SEQUENCE_1 = ":"
 SEQUENCE_2 = "::"
 SERIES = ";"
 CLOSEST = ";;"
 QUERY = "?"
-NOT_QUERY = "??" """
+NOT_QUERY = "??"
+MODES = [SEQUENCE_1, SEQUENCE_2, SERIES, CLOSEST, QUERY, NOT_QUERY]
 
-"""CURRENT = "$"
+CURRENT = "$"
 START = "="
 DEFAULT_INPUT = "#"
 STRINGED = '"'
+PARAMS = [CURRENT, START, DEFAULT_INPUT, STRINGED]
+
+LITERAL_ESCAPE = "\\"
+LITERAL_QUOTE = "'"
 
 PLUS = "+"
 MINUS = "-"
@@ -63,6 +71,9 @@ MOD = "%"
 E = "e"
 
 EXTRA_OPS = "b"
+EXTRA_BUILTINS = "\\"
+EXTRA_CONSTANTS = "_"
+
 BITWISE_NOT = "b~"
 BITWISE_OR = "b|"
 BITWISE_NOR = "bn"
@@ -76,11 +87,20 @@ BITWISE_RIGHT = "b>"
 STRING_LEFT = "b-"
 STRING_RIGHT = "b+"
 
-SEPARATOR = ","
+OEIS_START = "O"
+
+TERM_SEPARATOR = ","
 META_SEPARATOR = "|"
+FUNCTION_SEPARATOR = ";"
+SEPARATORS = [TERM_SEPARATOR, META_SEPARATOR, FUNCTION_SEPARATOR]
+
 LPAREN = "("
+LCONTAINERS = [LPAREN]
+
 RPAREN = ")"
-NEWLINE = "\n" """
+RCONTAINERS = [RPAREN]
+
+NEWLINE_CHAR = "\n"
 
 is_one_int = re.compile("^[0-9]$")
 is_id = re.compile("^[$nv-zA-E]$")
@@ -119,7 +139,7 @@ builtins = {
 }
 
 # functions for other lines
-# builtins.update({EXTRA_BUILTINS_START + str(line_number): lambda inter, node, line_number=line_number: get_line(inter, node, line_number) for line_number in range(10)})
+builtins.update({EXTRA_BUILTINS + str(line_number): lambda inter, node, line_number=line_number: get_line(inter, node, line_number) for line_number in range(10)})
 
 #FIXME: Global lines object causes bugs when doing this
 builtins.update({sequence: lambda inter, node, sequence=sequence: get_OEIS(inter, node.parameters, oeis.OEIS[sequence]) for sequence in oeis.OEIS})
@@ -137,7 +157,7 @@ constants = {
 unary_ops = {
     "-": lambda x: -x,
     "+": lambda x: +x,
-    "~": lambda x: ~x,
+    BITWISE_NOT: lambda x: ~x,
     STRING_LEFT: lambda x: builtin_helper.primitive_rotate(x, -1),
     STRING_RIGHT: lambda x: builtin_helper.primitive_rotate(x, 1)
 }
@@ -149,22 +169,24 @@ post_unary_ops = {
 binary_ops = {
     "+": lambda x, y: x + y,
     "-": lambda x, y: x - y,
-    "·": lambda x, y: builtin_helper.concat(x, y),
-    "×": lambda x, y: x * y,
-    "÷": lambda x, y: x / y,
-    "I": lambda x, y: x // y,
-    "*": lambda x, y: x ** y,
+    "~": lambda x, y: builtin_helper.concat(x, y),
+    "*": lambda x, y: x * y,
+    "/": lambda x, y: x / y,
+    INT_DIV: lambda x, y: x // y,
+    "^": lambda x, y: x ** y,
     "%": lambda x, y: x % y,
-    "𝔼": lambda x, y: x * (10 ** y),
-    "|": lambda x, y: x | y,
+    "e": lambda x, y: x * (10 ** y),
+    BITWISE_OR: lambda x, y: x | y,
     BITWISE_NOR: lambda x, y: ~(x | y),
-    "^": lambda x, y: x ^ y,
+    BITWISE_XOR: lambda x, y: x ^ y,
     BITWISE_XNOR: lambda x, y: ~(x ^ y),
-    "&": lambda x, y: x & y,
+    BITWISE_AND: lambda x, y: x & y,
     BITWISE_NAND: lambda x, y: ~(x & y),
-    "«": lambda x, y: x << y,
-    "»": lambda x, y: x >> y
+    BITWISE_LEFT: lambda x, y: x << y,
+    BITWISE_RIGHT: lambda x, y: x >> y
 }
+
+OPERATORS = list(binary_ops.keys()) + list(unary_ops.keys()) + list(post_unary_ops.keys())
 
 
 class Sequence:
@@ -235,7 +257,7 @@ class Token:
         self.val = val
 
     def can_multiply(self):
-        return self.type in (NUMBER, ID, BUILTIN, LPAREN, CONSTANT)
+        return self.type in (NUMBER, ID, BUILTIN, LCONTAINER, CONSTANT)
 
     def __str__(self):
         return "<Token: " + self.type + " " + str(self.val) + ">"
@@ -252,12 +274,25 @@ class Lexer:
         except IndexError:
             self.cur = None
 
-        # self.param_found = False
+        self.mode_set = False
+        self.param_found = False
         self.mode = None
 
     def read_token(self):
         if self.cur is None:
             return Token(EOF, "")
+
+        # reading literals before first parameter
+        if not self.mode_set and not self.param_found:
+            if self.cur == LITERAL_ESCAPE:
+                self.advance()
+                return Token(LITERAL, self.advance())
+            elif self.cur in PARAMS:
+                self.param_found = True
+            elif self.cur == META_SEPARATOR:
+                return Token(SEPARATOR, self.advance())
+            elif self.cur not in MODES:
+                return Token(LITERAL, self.advance())
 
         while self.cur == " ":
             self.advance()
@@ -265,22 +300,32 @@ class Lexer:
             if self.cur is None:
                 return Token(EOF, "")
 
-        if self.cur in MODES:
+        if not self.mode_set and self.cur in MODES:
             self.mode = self.cur
-            #self.param_found = True
+            self.mode_set = True
             self.advance()
+
+            if self.mode + self.cur in MODES:
+                self.mode += self.advance()
+
             return Token(MODE, self.mode)
 
-        elif self.cur in PARAMS:
+        elif not self.mode_set and self.cur in PARAMS:
             #self.param_found = True
-            temp = self.cur
-            self.advance()
-            return Token(PARAM, temp)
+            #temp = self.cur
+            #self.advance()
+            return Token(PARAM, self.advance())
 
         elif self.cur in SEPARATORS:
-            temp = self.cur
-            self.advance()
-            return Token(SEPARATOR, temp)
+            #temp = self.cur
+            #self.advance()
+            return Token(SEPARATOR, self.advance())
+
+        elif self.cur in LCONTAINERS:
+            return Token(LCONTAINER, self.advance())
+
+        elif self.cur in RCONTAINERS:
+            return Token(RCONTAINER, self.advance())
 
         elif self.cur == "." or is_one_int.match(self.cur):
             return self.read_number()
@@ -288,13 +333,13 @@ class Lexer:
         elif is_id.match(self.cur):
             return self.read_id()
 
-        elif self.cur == "_":
-            self.advance()
-            temp = self.cur
-            self.advance()
-            return Token(CONSTANT, temp)
+        elif self.cur == EXTRA_CONSTANTS:
+            #self.advance()
+            #temp = self.cur
+            #self.advance()
+            return Token(CONSTANT, self.advance() + self.advance())
 
-        elif self.cur == "O":
+        elif self.cur == OEIS_START:
             self.advance()
             temp = str(self.read_number().val)
             temp = self.cur + "0" * (6 - len(temp)) + temp
@@ -302,55 +347,65 @@ class Lexer:
             return Token(BUILTIN, temp)
 
         elif self.cur in builtins:
-            temp = self.cur
-            self.advance()
-            return Token(BUILTIN, temp)
+            #temp = self.cur
+            #self.advance()
+            return Token(BUILTIN, self.advance())
 
-        elif self.cur == EXTRA_BUILTINS_START and self.cur + self.peek() in builtins:
-            temp = self.cur
-            self.advance()
-            temp += self.cur
-            self.advance()
-            return Token(BUILTIN, temp)
+        elif self.cur == EXTRA_BUILTINS and self.cur + self.peek() in builtins:
+            #temp = self.cur
+            #self.advance()
+            #temp += self.cur
+            #self.advance()
+            return Token(BUILTIN, self.advance() + self.advance())
+
+        elif self.cur == EXTRA_OPS and self.cur + self.peek() in OPERATORS or self.cur + self.peek() in OPERATORS:
+            #temp = self.cur
+            #self.advance()
+            #temp += self.cur
+            #self.advance()
+            return Token(OPERATOR, self.advance() + self.advance())
 
         elif self.cur in OPERATORS:
-            temp = self.cur
-            self.advance()
-            return Token(OPERATOR, temp)
+            #temp = self.cur
+            #self.advance()
+            return Token(OPERATOR, self.advance())
 
-        if self.cur == "\\":
+        if self.cur == LITERAL_ESCAPE:
             self.advance()
-            temp = self.cur
-            self.advance()
-            return Token(LITERAL, temp)
-        elif self.cur == "'":
+            #temp = self.cur
+            #self.advance()
+            return Token(LITERAL, self.advance())
+        elif self.cur == LITERAL_QUOTE:
             self.advance()
             temp = self.read_literal()
             self.advance()
             return temp
-        elif self.cur == "\n":
+        elif self.cur == NEWLINE_CHAR:
             self.advance()
             self.reset()
-            return Token(NEWLINE, "\n")
+            return Token(NEWLINE, NEWLINE_CHAR)
         else:
             if self.cur is not None:
-                temp = self.cur
-                self.advance()
-                return Token(LITERAL, temp)
+                #temp = self.cur
+                #self.advance()
+                return Token(LITERAL, self.advance())
 
         # raise CQError("Unknown character found : " + self.cur)
 
     def advance(self):
+        temp = self.cur
         self.pos += 1
         try:
             self.cur = self.text[self.pos]
         except IndexError:
             self.cur = None
 
+        return temp
+
     def read_id(self):
-        temp = self.cur
-        self.advance()
-        return Token(ID, temp)
+        #temp = self.cur
+        #self.advance()
+        return Token(ID, self.advance())
 
     def read_number(self):
         result = ""
@@ -377,7 +432,7 @@ class Lexer:
     def read_literal(self):
         result = ""
 
-        while self.cur is not None and self.cur != "'":
+        while self.cur is not None and self.cur != LITERAL_QUOTE:
             result += self.cur
             self.advance()
 
@@ -395,7 +450,8 @@ class Lexer:
         except IndexError:
             self.cur = None
 
-        # self.param_found = False
+        self.mode_set = False
+        self.param_found = False
         self.mode = None
 
 
@@ -414,18 +470,20 @@ class Parser:
             (EXPONENT, E)
         ]
 
-    def eat(self, type_):
+    def eat(self, type_, char=None):
         if self.token.type == type_:
             self.token = self.lexer.read_token()
         else:
-            if type_ == EOF or type_ == RPAREN and self.token.type in (EOF, NEWLINE):
+            if type_ == EOF or type_ == RCONTAINER and self.token.type in (EOF, NEWLINE):
                 return
 
             raise CQSyntaxError("Incorrect token found: looking for " + type_ + ", found " + self.token.type + " | " + self.token.val + " at " + self.lexer.pos)
 
     def parse(self):
         lines_ = [self.program()]
+
         while self.token.type == NEWLINE:
+
             self.eat(NEWLINE)
             lines_.append(self.program())
 
@@ -445,12 +503,12 @@ class Parser:
 
         lit_index = 0
 
-        while (self.token.type == LITERAL and lit_index <= 2) or (self.token.type == META_SEPARATOR and lit_index < 2):
+        while (self.token.type == LITERAL and lit_index <= 2) or (self.token.type == SEPARATOR and self.token.val == META_SEPARATOR and lit_index < 2):
             if self.token.type == LITERAL:
                 literals[lit_index] += self.token.val
                 self.eat(LITERAL)
-            elif self.token.type == META_SEPARATOR:
-                self.eat(META_SEPARATOR)
+            elif self.token.val == META_SEPARATOR:
+                self.eat(SEPARATOR)
                 lit_index += 1
 
         default_input = [], []
@@ -485,11 +543,18 @@ class Parser:
     def items(self):
         items = [self.expr()]
 
-        while self.token.type == SEPARATOR:
+        while self.token.val == TERM_SEPARATOR:
             self.eat(SEPARATOR)
             items.append(self.expr())
 
         return items
+
+    def function_items(self):
+        items = [self.expr()]
+
+        while self.token.val == FUNCTION_SEPARATOR:
+            self.eat(SEPARATOR)
+            items.append(self.expr())
 
     def input_list(self):
         items = [], []
@@ -497,17 +562,17 @@ class Parser:
         inc = 0
 
         while inc <= 1:
-            if self.token.type == META_SEPARATOR and inc == 0:
-                self.eat(META_SEPARATOR)
+            if self.token.type == SEPARATOR and self.token.val == META_SEPARATOR and inc == 0:
+                self.eat(SEPARATOR)
                 inc += 1
             elif inc == 1:
                 break
 
             items[inc].append(self.expr())
 
-            if self.token.type == SEPARATOR:
+            if self.token.type == SEPARATOR and self.token.val == TERM_SEPARATOR:
                 self.eat(SEPARATOR)
-            elif self.token.type != META_SEPARATOR:
+            elif self.token.val != META_SEPARATOR:
                 break
 
         return items
@@ -521,7 +586,7 @@ class Parser:
         node = self.op_0()
 
         # valid 3rd priority operations
-        while self.token.type in self.operations[0]:
+        while self.token.val in self.operations[0]:
             tok = self.token
 
             self.eat(tok.type)
@@ -533,7 +598,7 @@ class Parser:
     def op_0(self):
         node = self.op_1()
 
-        while self.token.type in self.operations[1]:
+        while self.token.val in self.operations[1]:
             tok = self.token
             self.eat(tok.type)
             node = BinOp(node, tok, self.op_1())
@@ -543,7 +608,7 @@ class Parser:
     def op_1(self):
         node = self.op_2()
 
-        while self.token.type in self.operations[2]:
+        while self.token.val in self.operations[2]:
             tok = self.token
             self.eat(tok.type)
             node = BinOp(node, tok, self.op_2())
@@ -553,7 +618,7 @@ class Parser:
     def op_2(self):
         node = self.op_3()
 
-        while self.token.type in self.operations[3]:
+        while self.token.val in self.operations[3]:
             tok = self.token
             self.eat(tok.type)
             node = BinOp(node, tok, self.op_3())
@@ -563,7 +628,7 @@ class Parser:
     def op_3(self):
         node = self.term()
 
-        while self.token.type in self.operations[-3]:
+        while self.token.val in self.operations[-3]:
             tok = self.token
             self.eat(tok.type)
             node = BinOp(node, tok, self.term())
@@ -575,7 +640,7 @@ class Parser:
         node = self.short_term()
 
         # valid 2nd priority operations
-        while self.token.type in self.operations[-2] or self.token.can_multiply():
+        while self.token.val in self.operations[-2] or self.token.can_multiply():
             tok = self.token
 
             if tok.can_multiply():
@@ -592,7 +657,7 @@ class Parser:
         node = self.factor()
 
         # valid 1st priority operations
-        while self.token.type in self.operations[-1]:
+        while self.token.val in self.operations[-1]:
             tok = self.token
 
             self.eat(tok.type)
@@ -604,7 +669,7 @@ class Parser:
     def factor(self):
         tok = self.token
 
-        if tok.type in unary_ops:
+        if tok.val in unary_ops:
             self.eat(tok.type)
             return UnaryOp(tok, self.factor())
         elif tok.type == NUMBER:
@@ -613,16 +678,16 @@ class Parser:
         elif tok.type == CONSTANT:
             self.eat(CONSTANT)
             return Constant(tok.val)
-        elif tok.type == LPAREN:
-            self.eat(LPAREN)
+        elif tok.type == LCONTAINER:
+            self.eat(LCONTAINER)
             node = self.expr()
-            self.eat(RPAREN)
+            self.eat(RCONTAINER)
             return node
         elif tok.type == BUILTIN:
             builtin = tok.val
             self.eat(BUILTIN)
             nodes = self.items()
-            self.eat(RPAREN)
+            self.eat(RCONTAINER)
             return Builtin(builtin, nodes)
         elif tok.type == ID:
             return self.variable()
@@ -682,7 +747,7 @@ class Interpreter(NodeVisitor):
         self.current = 1
         self.current_inc = 1
         self.program = None
-        self.join = SEPARATOR
+        self.join = TERM_SEPARATOR
 
     def visit_Program(self, node):
         do_prints = not isinstance(self, HelperInterpreter)
@@ -723,7 +788,7 @@ class Interpreter(NodeVisitor):
 
         # starting literals
         if do_prints:
-            print(node.literals[0], end="")
+            print(node.literals[0], end="", flush=node.is_stringed)
 
         if n is None:
             query_n = False
@@ -733,8 +798,10 @@ class Interpreter(NodeVisitor):
 
         if node.is_stringed:
             self.join = node.literals[1] or ""
+
+            # also note that all prints will need to be flushed if is_stringed is true
         else:
-            self.join = node.literals[1] or SEPARATOR
+            self.join = node.literals[1] or TERM_SEPARATOR
 
         if node.mode in (SEQUENCE_2, QUERY, NOT_QUERY) and not query_n:
             pass
@@ -748,20 +815,28 @@ class Interpreter(NodeVisitor):
                     if query_n:
                         if n == self.current:
                             if do_prints:
-                                print(val, end="")
+                                print(val, end="", flush=node.is_stringed)
+                            else:
+                                return val
+                            break
+
+                        # if input n is less than the current index, it will never be in it, so output 0
+                        elif n < self.current:
+                            if do_prints:
+                                print(0, end="", flush=node.is_stringed)
                             else:
                                 return val
                             break
                     else:
-                        print(val, end=self.join)
+                        print(val, end=self.join, flush=node.is_stringed)
 
                 elif node.mode == SEQUENCE_2:
                     if query_n:
                         if n == self.current:
-                            print(val, end="")
+                            print(val, end="", flush=node.is_stringed)
                             break
                         else:
-                            print(val, end=self.join)
+                            print(val, end=self.join, flush=node.is_stringed)
 
                 elif node.mode == SERIES:
                     sum_ += val
@@ -769,7 +844,7 @@ class Interpreter(NodeVisitor):
                     if query_n:
                         if n == self.current:
                             if do_prints:
-                                print(sum_, end="")
+                                print(sum_, end="", flush=node.is_stringed)
                             else:
                                 return sum_
                             break
@@ -783,39 +858,40 @@ class Interpreter(NodeVisitor):
 
                     if query_n:
                         if n == val:
-                            print(if_in, end="")
+                            print(if_in, end="", flush=node.is_stringed)
                             break
                         # elif previous and cur_val < previous:
-                        #     print("false", end="")
+                        #     print("false", end="", flush=node.is_stringed)
                         #     done = True
 
                         # TODO: FIXME
                         elif val > n:
-                            print(if_out, end="")
+                            print(if_out, end="", flush=node.is_stringed)
                             break
 
                 self.current += self.current_inc
 
         if do_prints:
-            print(node.literals[2], end="")
+            print(node.literals[2], end="", flush=node.is_stringed)
 
     def visit_BinOp(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)
 
-        if node.op.type in binary_ops:
-            return binary_ops[node.op.type](left, right)
+        if node.op.val in binary_ops:
+            return binary_ops[node.op.val](left, right)
 
     def visit_Constant(self, node):
-        return constants[node.name]
+        # _ is included in node.name but not in constant dict
+        return constants[node.name[1:]]
 
     def visit_Builtin(self, node):
         if node.builtin in builtins:
             return builtins[node.builtin](self, node)
 
     def visit_UnaryOp(self, node):
-        if node.op.type in unary_ops:
-            return unary_ops[node.op.type](self.visit(node.expr))
+        if node.op.val in unary_ops:
+            return unary_ops[node.op.val](self.visit(node.expr))
 
     def visit_Var(self, node):
         if node.name == CURRENT:

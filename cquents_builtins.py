@@ -1,9 +1,6 @@
 import math
 import itertools
 
-test = "test"
-
-
 # http://www.macdevcenter.com/pub/a/python/excerpt/pythonckbk_chap1/index1.html?page=2
 def gen_primes():
     D = {}
