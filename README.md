@@ -3,6 +3,8 @@ An esoteric programming language designed for golfing. It can describe mathemati
 
 My interpreter's code was originally modeled after [this very helpful tutorial](https://ruslanspivak.com/lsbasi-part1/), but it has been heavily modified since then.
 
+To try cQuents, [click here for an online interpreter](https://tio.run/#cquents). Note that the online interpreter may be behind the master branch.
+
 # Table of Contents
 
 - [Basic Tutorial](https://github.com/stestoltz/cQuents#basic-tutorial)
