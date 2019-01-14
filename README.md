@@ -1,7 +1,7 @@
 # cQuents
-WIP Language for sequences and series. May change at any time.
+An esoteric programming language designed for golfing. It can describe mathematical sequences and series with very little source code.
 
-Lexer/parser/interpreter code originally from [this very helpful tutorial](https://ruslanspivak.com/lsbasi-part1/), but it was heavily modified since then.
+My interpreter's code was originally modeled after [this very helpful tutorial](https://ruslanspivak.com/lsbasi-part1/), but it has been heavily modified since then.
 
 # Table of Contents
 
