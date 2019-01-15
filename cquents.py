@@ -36,12 +36,15 @@ NEWLINE = "NEWLINE"
 LCONTAINER = "LCONTAINER"
 RCONTAINER = "RCONTAINER"
 
-# MODES = []
-# PARAMS = []
-# SEPARATORS = []
-# OPERATORS = []
-# LCONTAINERS = []
-# RCONTAINERS = []
+# modes = []
+# params = []
+# separators = []
+# operators = []
+# extra_operators = []
+# builtins = []
+# extra_builtins = []
+# lcontainers = []
+# rcontainers = []
 
 SEQUENCE_1 = ":"
 SEQUENCE_2 = "::"
@@ -49,76 +52,63 @@ SERIES = ";"
 CLOSEST = ";;"
 QUERY = "?"
 NOT_QUERY = "??"
-MODES = [SEQUENCE_1, SEQUENCE_2, SERIES, CLOSEST, QUERY, NOT_QUERY]
+modes = [SEQUENCE_1, SEQUENCE_2, SERIES, CLOSEST, QUERY, NOT_QUERY]
 
-CURRENT = "$"
-START = "="
+START_INDEX = "$"
+START_TERMS = "="
 DEFAULT_INPUT = "#"
 STRINGED = '"'
-PARAMS = [CURRENT, START, DEFAULT_INPUT, STRINGED]
-
-LITERAL_ESCAPE = "@"
-LITERAL_QUOTE = "'"
-
-PLUS = "+"
-MINUS = "-"
-CONCAT = "~"
-MUL = "*"
-DIV = "/"
-INT_DIV = "//"
-EXPONENT = "^"
-MOD = "%"
-E = "e"
-
-EXTRA_OPS = "b"
-EXTRA_BUILTINS = "\\"
-EXTRA_CONSTANTS = "_"
-
-BITWISE_NOT = "b~"
-BITWISE_OR = "b|"
-BITWISE_NOR = "bn"
-BITWISE_XOR = "b^"
-BITWISE_XNOR = "bx"
-BITWISE_AND = "b&"
-BITWISE_NAND = "bN"
-BITWISE_LEFT = "b<"
-BITWISE_RIGHT = "b>"
-
-STRING_LEFT = "bl"
-STRING_RIGHT = "br"
-INCREMENT = "b+"
-DECREMENT = "b-"
-
-OEIS_START = "O"
+params = [START_INDEX, START_TERMS, DEFAULT_INPUT, STRINGED]
 
 TERM_SEPARATOR = ","
 META_SEPARATOR = "|"
 FUNCTION_SEPARATOR = ";"
-SEPARATORS = [TERM_SEPARATOR, META_SEPARATOR, FUNCTION_SEPARATOR]
+separators = [TERM_SEPARATOR, META_SEPARATOR, FUNCTION_SEPARATOR]
 
 LPAREN = "("
-LCONTAINERS = [LPAREN]
+lcontainers = [LPAREN]
 
 RPAREN = ")"
-RCONTAINERS = [RPAREN]
+rcontainers = [RPAREN]
+
+DECIMAL_POINT = "."
+
+LITERAL_ESCAPE = "@"
+LITERAL_QUOTE = "'"
+
+OEIS_START = "O"
 
 NEWLINE_CHAR = "\n"
 
-is_one_int = re.compile("^[0-9]$")
-is_id = re.compile("^[$nv-zA-E]$")
-is_input_id = re.compile("^[A-E]$")
-is_previous_id = re.compile("^[v-z]$")
+
+""" VARIABLES"""
+
+N = "n"
+CURRENT = "$"
+input_ids = ["A", "B", "C", "D", "E"]
+previous_ids = ["z", "y", "x", "w", "v"]
+variables = [N, CURRENT] + input_ids + previous_ids
+
+def is_variable(x): return x in variables
 
 
-def get_line(origin_interpreter, node, index):
-    next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in node.parameters]
+""" CONSTANTS """
 
-    return origin_interpreter.lines[index].interpreter.interpret(next_parameters)
+CONSTANTS = "`"     # all have ` appended to beginning of command
+constants = {
+    CONSTANTS + "c": 0.915965594177219,
+    CONSTANTS + "e": math.e,
+    CONSTANTS + "g": .5 * (math.sqrt(5) + 1),
+    CONSTANTS + "G": 0.128242712910062,
+    CONSTANTS + "k": 0.268545200106530,
+    CONSTANTS + "p": math.pi,
+    CONSTANTS + "y": 0.577215664901532
+}
+
+def is_constant(x): return x in constants
 
 
-def get_OEIS(origin_interpreter, parameters, cq_source):
-    next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in parameters]
-    return run(cq_source, next_parameters, is_oeis=True)
+""" BUILTINS """
 
 builtins = {
     "a": lambda inter, node: abs(inter.visit(node.parameters[0])),
@@ -130,67 +120,117 @@ builtins = {
     "p": lambda inter, node: builtin_helper.next_prime(inter.visit(node.parameters[0])),
     "r": lambda inter, node: builtin_helper.root(inter, node.parameters),
     "R": lambda inter, node: round(inter.visit(node.parameters[0])),
-    "X": lambda inter, node: math.exp(inter.visit(node.parameters[0])),
-    "\\c": lambda inter, node: math.cos(inter.visit(node.parameters[0])),
-    #"\\f": lambda inter, node: builtin_helper.fill(inter, node.parameters),
-    "\\l": lambda inter, node: math.log10(inter.visit(node.parameters[0])),
-    "\\r": lambda inter, node: builtin_helper.reverse(inter, node.parameters),
-    "\\R": lambda inter, node: builtin_helper.rotate(inter, node.parameters),
-    "\\s": lambda inter, node: math.sin(inter.visit(node.parameters[0])),
-    "\\t": lambda inter, node: math.tan(inter.visit(node.parameters[0]))
+    "X": lambda inter, node: math.exp(inter.visit(node.parameters[0]))
 }
 
+EXTRA_BUILTINS = "\\"   # all have \ appended to beginning of command
+extra_builtins = {
+    EXTRA_BUILTINS + "c": lambda inter, node: math.cos(inter.visit(node.parameters[0])),
+  # EXTRA_BUILTINS + "f": lambda inter, node: builtin_helper.fill(inter, node.parameters),
+    EXTRA_BUILTINS + "l": lambda inter, node: math.log10(inter.visit(node.parameters[0])),
+    EXTRA_BUILTINS + "r": lambda inter, node: builtin_helper.reverse(inter, node.parameters),
+    EXTRA_BUILTINS + "R": lambda inter, node: builtin_helper.rotate(inter, node.parameters),
+    EXTRA_BUILTINS + "s": lambda inter, node: math.sin(inter.visit(node.parameters[0])),
+    EXTRA_BUILTINS + "t": lambda inter, node: math.tan(inter.visit(node.parameters[0]))
+}
+
+def get_line(origin_interpreter, node, index):
+    next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in node.parameters]
+
+    return origin_interpreter.lines[index].interpreter.interpret(next_parameters)
+
+
+def get_OEIS(origin_interpreter, parameters, cq_source):
+    next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in parameters]
+    return run(cq_source, next_parameters, is_oeis=True)
+
 # functions for other lines
-builtins.update({EXTRA_BUILTINS + str(line_number): lambda inter, node, line_number=line_number: get_line(inter, node, line_number) for line_number in range(10)})
+extra_builtins.update({EXTRA_BUILTINS + str(line_number): lambda inter, node, line_number=line_number: get_line(inter, node, line_number) for line_number in range(10)})
 
 #FIXME: Global lines object causes bugs when doing this
 builtins.update({sequence: lambda inter, node, sequence=sequence: get_OEIS(inter, node.parameters, oeis.OEIS[sequence]) for sequence in oeis.OEIS})
 
-constants = {
-    "c": 0.915965594177219,
-    "e": math.e,
-    "g": .5 * (math.sqrt(5) + 1),
-    "G": 0.128242712910062,
-    "k": 0.268545200106530,
-    "p": math.pi,
-    "y": 0.577215664901532
-}
+builtins.update(extra_builtins)
+
+def is_builtin(x): return x in builtins
+
+""" OPERATORS """
 
 unary_ops = {
     "-": lambda x: -x,
     "+": lambda x: +x,
-    BITWISE_NOT: lambda x: ~x,
-    STRING_LEFT: lambda x: builtin_helper.primitive_rotate(x, -1),
-    STRING_RIGHT: lambda x: builtin_helper.primitive_rotate(x, 1),
-    INCREMENT: lambda x: x + 1,
-    DECREMENT: lambda x: x - 1
+    "~": lambda x: ~x
 }
-
 post_unary_ops = {
     "!": lambda x: math.factorial(x)
 }
 
+MUL = "*"
 binary_ops = {
     "+": lambda x, y: x + y,
     "-": lambda x, y: x - y,
     "~": lambda x, y: builtin_helper.concat(x, y),
-    "*": lambda x, y: x * y,
+    MUL: lambda x, y: x * y,
     "/": lambda x, y: x / y,
-    INT_DIV: lambda x, y: x // y,
     "^": lambda x, y: x ** y,
     "%": lambda x, y: x % y,
-    "e": lambda x, y: x * (10 ** y),
-    BITWISE_OR: lambda x, y: x | y,
-    BITWISE_NOR: lambda x, y: ~(x | y),
-    BITWISE_XOR: lambda x, y: x ^ y,
-    BITWISE_XNOR: lambda x, y: ~(x ^ y),
-    BITWISE_AND: lambda x, y: x & y,
-    BITWISE_NAND: lambda x, y: ~(x & y),
-    BITWISE_LEFT: lambda x, y: x << y,
-    BITWISE_RIGHT: lambda x, y: x >> y
+    "e": lambda x, y: x * (10 ** y)
 }
 
-OPERATORS = list(binary_ops.keys()) + list(unary_ops.keys()) + list(post_unary_ops.keys())
+EXTRA_OPS = "_"     # all extra operators have _ appended to beginning of command
+
+extra_unary_ops = {
+    EXTRA_OPS + "l": lambda x: builtin_helper.primitive_rotate(x, -1),  # string rotate left
+    EXTRA_OPS + "r": lambda x: builtin_helper.primitive_rotate(x, 1),   # string rotate right
+    EXTRA_OPS + "+": lambda x: x + 1,
+    EXTRA_OPS + "-": lambda x: x - 1
+}
+extra_binary_ops = {
+    EXTRA_OPS + "/": lambda x, y: x // y,
+    EXTRA_OPS + "|": lambda x, y: x | y,        # bitwise OR
+    EXTRA_OPS + "n": lambda x, y: ~(x | y),     # bitwise NOR
+    EXTRA_OPS + "^": lambda x, y: x ^ y,        # bitwise XOR
+    EXTRA_OPS + "x": lambda x, y: ~(x ^ y),     # bitwise XNOR
+    EXTRA_OPS + "&": lambda x, y: x & y,        # bitwise AND
+    EXTRA_OPS + "N": lambda x, y: ~(x & y),     # bitwise NAND
+    EXTRA_OPS + "<": lambda x, y: x << y,       # bitwise left shift
+    EXTRA_OPS + ">": lambda x, y: x >> y        # bitwise right shift
+}
+
+unary_ops.update(extra_unary_ops)
+binary_ops.update(extra_binary_ops)
+
+extra_operators = {**extra_unary_ops, **extra_binary_ops}
+operators = {**binary_ops, **unary_ops, **post_unary_ops}
+
+def is_operator(x): return x in operators
+def is_unary_operator(x): return x in unary_ops or x in extra_unary_ops
+def is_binary_operator(x): return x in binary_ops or x in extra_binary_ops
+
+binary_operator_precedence = [
+    # last
+    ("_|", "_n"),
+    ("_^", "_x"),
+    ("_&", "_N"),
+    ("_<", "_>"),
+    ("-", "+", "~"),
+    ("*", "/", "_/", "%"),
+    ("^", "e")
+    # first
+]
+
+# print(set([op for line in binary_operator_precedence for op in line]))
+# print(set(list(binary_ops) + [EXTRA_OPS + op for op in list(extra_binary_ops)]))
+
+# all operators should have a precedence level
+assert set([op for line in binary_operator_precedence for op in line]) == \
+    set(list(binary_ops) + list(extra_binary_ops)), \
+    "Not all binary operators have a precedence level"
+
+
+""" START INTERPRETER """
+
+is_one_int = re.compile("^[0-9]$")
 
 
 class Sequence:
@@ -291,11 +331,11 @@ class Lexer:
             if self.cur == LITERAL_ESCAPE:
                 self.advance()
                 return Token(LITERAL, self.advance())
-            elif self.cur in PARAMS:
+            elif self.cur in params:
                 self.param_found = True
             elif self.cur == META_SEPARATOR:
                 return Token(SEPARATOR, self.advance())
-            elif self.cur not in MODES:
+            elif self.cur not in modes:
                 return Token(LITERAL, self.advance())
 
         while self.cur == " ":
@@ -304,43 +344,35 @@ class Lexer:
             if self.cur is None:
                 return Token(EOF, "")
 
-        if not self.mode_set and self.cur in MODES:
+        if not self.mode_set and self.cur in modes:
             self.mode = self.cur
             self.mode_set = True
             self.advance()
 
-            if self.mode + self.cur in MODES:
+            if self.mode + self.cur in modes:
                 self.mode += self.advance()
 
             return Token(MODE, self.mode)
 
-        elif not self.mode_set and self.cur in PARAMS:
-            #self.param_found = True
-            #temp = self.cur
-            #self.advance()
+        elif not self.mode_set and self.cur in params:
             return Token(PARAM, self.advance())
 
-        elif self.cur in SEPARATORS:
-            #temp = self.cur
-            #self.advance()
+        elif self.cur in separators:
             return Token(SEPARATOR, self.advance())
 
-        elif self.cur in LCONTAINERS:
+        elif self.cur in lcontainers:
             return Token(LCONTAINER, self.advance())
 
-        elif self.cur in RCONTAINERS:
+        elif self.cur in rcontainers:
             return Token(RCONTAINER, self.advance())
 
-        elif self.cur == "." or is_one_int.match(self.cur):
+        elif self.cur == DECIMAL_POINT or is_one_int.match(self.cur):
             return self.read_number()
 
-        elif is_id.match(self.cur):
+        elif self.cur in variables:
             return self.read_id()
 
-        elif self.cur == EXTRA_CONSTANTS:
-            #self.advance()
-            #temp = self.cur
-            #self.advance()
+        elif self.cur == CONSTANTS and self.cur + self.peek() in constants:
             return Token(CONSTANT, self.advance() + self.advance())
 
         elif self.cur == OEIS_START:
@@ -351,34 +383,19 @@ class Lexer:
             return Token(BUILTIN, temp)
 
         elif self.cur in builtins:
-            #temp = self.cur
-            #self.advance()
             return Token(BUILTIN, self.advance())
 
-        elif self.cur == EXTRA_BUILTINS and self.cur + self.peek() in builtins:
-            #temp = self.cur
-            #self.advance()
-            #temp += self.cur
-            #self.advance()
+        elif self.cur == EXTRA_BUILTINS and self.cur + self.peek() in extra_builtins:
             return Token(BUILTIN, self.advance() + self.advance())
 
-        elif self.cur in OPERATORS:
-            #temp = self.cur
-            #self.advance()
+        elif self.cur in operators:
             return Token(OPERATOR, self.advance())
 
-        elif self.cur == EXTRA_OPS and self.cur + self.peek() in OPERATORS or self.cur + self.peek() in OPERATORS:
-            #temp = self.cur
-            #self.advance()
-            #temp += self.cur
-            #self.advance()
-
+        elif self.cur == EXTRA_OPS and self.cur + self.peek() in extra_operators:
             return Token(OPERATOR, self.advance() + self.advance())
 
         if self.cur == LITERAL_ESCAPE:
             self.advance()
-            #temp = self.cur
-            #self.advance()
             return Token(LITERAL, self.advance())
         elif self.cur == LITERAL_QUOTE:
             self.advance()
@@ -391,8 +408,6 @@ class Lexer:
             return Token(NEWLINE, NEWLINE_CHAR)
         else:
             if self.cur is not None:
-                #temp = self.cur
-                #self.advance()
                 return Token(LITERAL, self.advance())
 
         # raise CQError("Unknown character found : " + self.cur)
@@ -407,9 +422,8 @@ class Lexer:
 
         return temp
 
+    # may be longer at some point
     def read_id(self):
-        #temp = self.cur
-        #self.advance()
         return Token(ID, self.advance())
 
     def read_number(self):
@@ -419,16 +433,16 @@ class Lexer:
             result += self.cur
             self.advance()
 
-        if self.cur == ".":
-            result += "."
+        if self.cur == DECIMAL_POINT:
+            result += DECIMAL_POINT
             self.advance()
 
             while self.cur is not None and is_one_int.match(self.cur):
                 result += self.cur
                 self.advance()
 
-            if result == ".":
-                return Token(LITERAL, ".")
+            if result == DECIMAL_POINT:
+                return Token(LITERAL, DECIMAL_POINT)
 
             return Token(NUMBER, float(result))
 
@@ -465,21 +479,11 @@ class Parser:
         self.lexer = lexer_
         self.token = self.lexer.read_token()
 
-        self.operations = [
-            (BITWISE_OR, BITWISE_NOR),
-            (BITWISE_XOR, BITWISE_XNOR),
-            (BITWISE_AND, BITWISE_NAND),
-            (BITWISE_LEFT, BITWISE_RIGHT),
-            (MINUS, PLUS, CONCAT),
-            (MUL, DIV, INT_DIV, MOD),
-            (EXPONENT, E)
-        ]
-
-    def eat(self, type_, char=None):
+    def eat(self, type_):
         if self.token.type == type_:
             self.token = self.lexer.read_token()
         else:
-            if type_ == EOF or type_ == RCONTAINER and self.token.type in (EOF, NEWLINE):
+            if type_ == EOF or (type_ == RCONTAINER and self.token.type in (EOF, NEWLINE, TERM_SEPARATOR)):
                 return
 
             raise CQSyntaxError("Incorrect token found: looking for " + type_ + ", found " + self.token.type + " | " + self.token.val + " at " + self.lexer.pos)
@@ -496,11 +500,11 @@ class Parser:
         return lines_
 
     def program(self):
-        params = self.params()
+        parameters = self.params()
         mode = self.mode()
         items = self.items()
 
-        program = Program(params, mode, items)
+        program = Program(parameters, mode, items)
         return program
 
     def params(self):
@@ -525,18 +529,18 @@ class Parser:
             if self.token.val == DEFAULT_INPUT:
                 self.eat(PARAM)
                 default_input = self.input_list()
-            elif self.token.val == START:
+            elif self.token.val == START_TERMS:
                 self.eat(PARAM)
                 start = self.items()
-            elif self.token.val == CURRENT:
+            elif self.token.val == START_INDEX:
                 self.eat(PARAM)
                 current_start = self.items()
             elif self.token.val == STRINGED:
                 self.eat(PARAM)
                 is_stringed = True
 
-        params = Params(literals, default_input, start, current_start, is_stringed)
-        return params
+        parameters = Params(literals, default_input, start, current_start, is_stringed)
+        return parameters
 
     def mode(self):
         temp = self.token
@@ -560,6 +564,8 @@ class Parser:
         while self.token.val == FUNCTION_SEPARATOR:
             self.eat(SEPARATOR)
             items.append(self.expr())
+
+        return items
 
     def input_list(self):
         items = [], []
@@ -587,94 +593,38 @@ class Parser:
         self.eat(ID)
         return node
 
-    def expr(self):
-        node = self.op_0()
+    # call expr for each layer of precedence, end with call to factor
+    def expr(self, cur_precedence=0):
+        next_precedence = cur_precedence + 1
 
-        # valid 3rd priority operations
-        while self.token.val in self.operations[0]:
-            tok = self.token
+        if next_precedence < len(binary_operator_precedence):
+            def next_layer(): return self.expr(next_precedence)
+        else:
+            def next_layer(): return self.factor()
 
-            self.eat(tok.type)
+        node = next_layer()
 
-            node = BinOp(node, tok, self.op_0())
+        while self.token.val in binary_operator_precedence[cur_precedence] or \
+                (MUL in binary_operator_precedence[cur_precedence] and self.token.can_multiply()):
 
-        return node
-
-    def op_0(self):
-        node = self.op_1()
-
-        while self.token.val in self.operations[1]:
-            tok = self.token
-            self.eat(tok.type)
-            node = BinOp(node, tok, self.op_1())
-
-        return node
-
-    def op_1(self):
-        node = self.op_2()
-
-        while self.token.val in self.operations[2]:
-            tok = self.token
-            self.eat(tok.type)
-            node = BinOp(node, tok, self.op_2())
-
-        return node
-
-    def op_2(self):
-        node = self.op_3()
-
-        while self.token.val in self.operations[3]:
-            tok = self.token
-            self.eat(tok.type)
-            node = BinOp(node, tok, self.op_3())
-
-        return node
-
-    def op_3(self):
-        node = self.term()
-
-        while self.token.val in self.operations[-3]:
-            tok = self.token
-            self.eat(tok.type)
-            node = BinOp(node, tok, self.term())
-
-        return node
-
-    def term(self):
-        # get first factor
-        node = self.short_term()
-
-        # valid 2nd priority operations
-        while self.token.val in self.operations[-2] or self.token.can_multiply():
             tok = self.token
 
             if tok.can_multiply():
-                tok = Token(MUL, MUL)
+                tok = Token(OPERATOR, MUL)
             else:
                 self.eat(tok.type)
 
-            node = BinOp(node, tok, self.short_term())
+            node = BinOp(node, tok, next_layer())
 
         return node
 
-    def short_term(self):
-        # get first factor
-        node = self.factor()
-
-        # valid 1st priority operations
-        while self.token.val in self.operations[-1]:
-            tok = self.token
-
-            self.eat(tok.type)
-
-            node = BinOp(node, tok, self.factor())
-
-        return node
 
     def factor(self):
         tok = self.token
 
-        if tok.type == OPERATOR and tok.val in unary_ops:
+        # print(extra_unary_ops)
+
+        if tok.type == OPERATOR and is_unary_operator(tok.val):
             self.eat(OPERATOR)
             node = UnaryOp(tok, self.factor())
         elif tok.type == NUMBER:
@@ -737,15 +687,13 @@ class Tester(NodeVisitor):
             self.visit(parameter)
 
     def visit_UnaryOp(self, node):
-        if node.op.val in unary_ops:
-            self.visit(node.expr)
+        self.visit(node.expr)
 
     def visit_PostUnaryOp(self, node):
-        if node.op.val in post_unary_ops:
-            self.visit(node.expr)
+        self.visit(node.expr)
 
     def visit_Var(self, node):
-        if is_input_id.match(node.name):
+        if is_variable(node.name):
             code = get_input_val(node.name)
             if self.max_input < code:
                 self.max_input = code
@@ -894,19 +842,19 @@ class Interpreter(NodeVisitor):
         left = self.visit(node.left)
         right = self.visit(node.right)
 
-        if node.op.val in binary_ops:
+        if is_binary_operator(node.op.val):
             return binary_ops[node.op.val](left, right)
 
     def visit_Constant(self, node):
-        # _ is included in node.name but not in constant dict
-        return constants[node.name[1:]]
+        if is_constant(node.name):
+            return constants[node.name]
 
     def visit_Builtin(self, node):
-        if node.builtin in builtins:
+        if is_builtin(node.builtin):
             return builtins[node.builtin](self, node)
 
     def visit_UnaryOp(self, node):
-        if node.op.val in unary_ops:
+        if is_unary_operator(node.op.val):
             return unary_ops[node.op.val](self.visit(node.expr))
 
     def visit_PostUnaryOp(self, node):
@@ -916,15 +864,15 @@ class Interpreter(NodeVisitor):
     def visit_Var(self, node):
         if node.name == CURRENT:
             return self.current
-        if node.name == "n":
+        if node.name == N:
             return self.n
-        elif is_previous_id.match(node.name):
+        elif node.name in previous_ids:
             try:
                 temp = self.sequence[-1 + ord(node.name) - 122]
             except IndexError:
                 temp = 0
             return temp
-        elif is_input_id.match(node.name):
+        elif node.name in input_ids:
             return self.visit(self.input[get_input_val(node.name)])
 
     def visit_Number(self, node):
@@ -962,15 +910,15 @@ class AST:
 
 
 class Program(AST):
-    def __init__(self, params, mode, statements):
-        self.literals = params.literals
-        self.input_front = params.default_input[0]
-        self.input_back = params.default_input[1]
-        self.start = params.start
-        self.current_start = params.current_start
+    def __init__(self, parameters, mode, statements):
+        self.literals = parameters.literals
+        self.input_front = parameters.default_input[0]
+        self.input_back = parameters.default_input[1]
+        self.start = parameters.start
+        self.current_start = parameters.current_start
         self.mode = mode
         self.statements = statements
-        self.is_stringed = params.is_stringed
+        self.is_stringed = parameters.is_stringed
 
     def __str__(self):
         return "<Program: " + ",".join([str(x) for x in self.statements]) + ">"
@@ -1093,6 +1041,8 @@ def run(cq_source, cq_input, is_oeis=False):
 
     first = True
     for program in programs:
+        # print(program)
+
         tester = Tester()
         tester.visit(program)
 

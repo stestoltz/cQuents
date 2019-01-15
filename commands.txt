@@ -130,31 +130,58 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  
  #TODO: GCD, LCM, toBase, more trig functions, 
 
------| Miscellaneous (after mode specified)
+-----| All ASCII
  \n  | (Literal newline) start new program on next line; can be called with \0 to \9
 ' '  | (Space) 
  !   | Factorial
  "   | (param stringify)
  #   | (param default input)
+ $   | current index
+ %   | modulus
  &   |
+ '   | literal quotes
  (   | Opening parenthesis.
  )   | Closing parenthesis for functions or opening parenthsis. Can be left off of program if before EOF or newline.
+ *   | multiplication
+ +   | addition
  ,   | item/term separator
+ -   | subtraction
+ .   | decimal point
+ 0   | zero
+ 1   | one
+ 2   | two
+ 3   | three
+ 4   | four
+ 5   | five
+ 6   | six
+ 7   | seven
+ 8   | eight
+ 9   | nine
  :   | (mode series)
  ;   | (mode sum), function separator
  <   |
  =   | (param start)
  >   |
- ?   |
+ ?   | (mode query)
+ @   | literal escape
+ A   |
+ B   |
+ C   |
+ D   |
+ E   |
+ F   |
  G   | #GCD
  H   |
  I   |
  J   |
  K   |
+ L   |
  M   | #LCM
  N   |
+ O   |
  P   |
  Q   |
+ R   |
  S   |
  T   |
  U   |
@@ -163,20 +190,37 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  Y   |
  Z   |
  [   |
+ \   | extra builtins start
  ]   |
- `   |
+ ^   | exponentiation
+ _   | extra operators start
+ `   | constants start
+ a   |
+ b   |
+ c   |
  d   |
+ e   |
+ f   |
  g   |
  h   |
  i   |
  j   |
  k   |
+ l   |
  m   |
+ n   |
  o   |
+ p   |
  q   |
+ r   |
  s   |
  t   |
  u   |
+ v   |
+ w   |
+ x   |
+ y   |
+ z   |
  {   |
  |   | (meta separator)
  }   |
