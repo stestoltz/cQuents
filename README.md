@@ -43,6 +43,7 @@ cQuents is designed with sequences in mind. Before you start creating a cQuents 
 | Sequence 2 | `::` | If there is `n`, output the sequence up to `n`; if no `n`, TODO: converge or diverge
 | Series | `;` | If there is `n`, output the sum of the sequence (or "series") up to `n`; if no `n`, output the whole series
 | Query | `?` | If there is `n`, output `true` if `n` is in the sequence, and `false` if `n` is not in the sequence; if no `n`, ignore right of mode
+| Reverse Query | `??` | If there is `n`, output `false` if `n` is in the sequence, and `true` if `n` is not in the sequence; if no `n`, ignore right of mode
 
 ## Sequence Definition
 
@@ -60,35 +61,78 @@ The following variables are currently valid identifiers:
 
 | Name | Syntax | Description
 | ---- | ------ | -----------
-| Input | `A` to `E` | Gets the first (`A`) to fifth (`E`) input (not including `n`; see **Parameters.Input** section for more details)
-| Previous | `v` to `z` | Gets the most recent (`z`) to fifth most recent (`v`) terms in the sequence. This means terms that have already been calculated. Defaults to `0`.
+| Input | `A` to `C` | Gets the first (`A`) to third (`C`) input (not including `n`; see **Parameters.Input** section for more details)
+| Previous | `X` to `Z` | Gets the most recent (`Z`) to third most recent (`X`) terms in the sequence. This means terms that have already been calculated. Defaults to `0`.
 | Current | `$` | Gets what term we are currently calculating in the sequence, starting with the starting index, if set, or `1`.
+| n | `n` | Gets n, if provided
+| Ten | `t` | Evaluates to 10
 
 #### Constants
 
-`_` signifies that the next char will be a constant identifier. The following are currently valid constants:
+The character `` ` `` signifies that the next char will be a constant identifier. The following are currently valid constants:
 
 | Name | Syntax | ~Value | Description
 | ---- | ------ | ------ | -----------
-| pi | `_p` | `3.141592653589793` | Currently equals Python's `math.pi`
-| e | `_e` | `2.718281828459045` | Currently equals Python's `math.e`
+| Catalan's constant | `` `c`` | `0.915965594177219` | Sum of 1 - 1/9 + 1/25 - 1/49 + ...
+| e | `` `e`` | `2.718281828459045` | Currently equals Python's `math.e`
+| Golden Ratio | `` `g`` | `1.618033988749895` | `.5 * (math.sqrt(5) + 1)`
+| Glaisher-Kinkelin constant | `` `G`` | `0.128242712910062` | .
+| Khinchin's constant | `` `k`` | `0.268545200106530` | .
+| pi | `` `p`` | `3.141592653589793` | Currently equals Python's `math.pi`
+| Euler-Mascheroni constant | `` `y`` | `0.577215664901532` | .
 
 #### Operations
 
 | Type | Name | Syntax | Description
 | ---- | ---- | ------ | -----------
 | Container | Parentheses | `(`code`)`\* | Acts like usual mathematical parentheses: surrounds a group of code and elevates it in the order of operations
-| Binary | Exponentation | `^` | Returns the left side to the power of the right side
-| Binary | Scientific | `e` | Returns the left side times ten to the power of the right side
+| Unary | Negation | `-` | Negates the right side (only occurs when there is no left side)
+| Unary | Positive | `+` | Positive of the right side (only occurs when there is no left side, can be used to convert non-number to number)
+| Unary | Bitwise Not | `~` | The negative of (the right side plus one)
+| Post-Unary | Factorial | `!` | The factorial of the left side
 | Binary | Addition | `+` | Adds the left side to the right side
 | Binary | Subtraction | `-` | Subtracts the right side from the left side
+| Binary | Concatentation | `~` | Concatenaties the right side to the left side
 | Binary | Multiplication | `*`, implicit | Multiplies the left side by the right side; can be used implicitly, as in Algebra: `2z`, `2(1+$)`
 | Binary | Division | `/` | Divides the left side by the right side
-| Binary | Integer Division | `//` | Integer divides the left side by the right side
+| Binary | Exponentation | `^` | Returns the left side to the power of the right side
 | Binary | Modulus | `%` | Gets the left side mod the right side
-| Unary | Negation | `-` | Negates the right side (only occurs when there is no left side)
+| Binary | Scientific | `e` | Returns the left side times ten to the power of the right side
 
 \* note that trailing `)`s right before the end of your code can all be left off
+
+##### Extra Operations
+
+The character `_` signifies an two-byte operation.
+
+| Type | Name | Syntax | Description
+| ---- | ---- | ------ | -----------
+| Unary | Rotate Left | `_l` | Rotates the right side left once
+| Unary | Rotate Right | `_r` | Rotates the right side right once
+| Unary | Increment | `_+` | Adds one to the right side
+| Unary | Decrement | `_-` | Subtracts one from the right side
+| Binary | Integer Division | `_/` | Integer divides the left side by the right side\
+| Binary | Bitwise OR | `_\|` | .
+| Binary | Bitwise NOR | `_n` | .
+| Binary | Bitwise XOR | `_^` | .
+| Binary | Bitwise XNOR | `_x` | .
+| Binary | Bitwise AND | `_&` | .
+| Binary | Bitwise NAND | `_N` | .
+| Binary | Bitwise Left Shift | `_<` | .
+| Binary | Bitwise Right Shift | `_>` | .
+
+##### Operator Precedence Table
+
+| First |
+| ----- |
+| `^`, `e` |
+| `*`, `/`, `_/`, `%` |
+| `-`, `+`, `~` |
+| `_<`, `_>` |
+| `_&`, `_N` |
+| `_^`, `_x` |
+| `_\|`, `_n` |
+| **Last** |
 
 #### Builtins
 
@@ -96,23 +140,29 @@ Builtin function are called with their identifier, a comma-delimited list of the
 
 | Name | Identifier | Parameters | Description
 | ---- | ---------- | ---------- | -----------
-| Absolute Value | `a` | 1 | Returns the absolute value of the first parameter
-| Ceiling | `c` | 1 | Returns the ceil of the first parameter
+| First Line | `a` | 1 to many | Returns the first line given the parameters as input
+| Second Line | `b` | 1 to many | Returns the second line given the parameters as input
+| Third Line | `c` | 1 to many | Returns the third line given the parameters as input
+| Line Function | `d` | 2 to many | Returns the line at the first parameter given the rest of the parameters
 | Factorial | `f` | 1 | Returns the factorial (`!`) of the first parameter
 | Floor | `F` | 1 | Returns the floor of the first parameter
-| OEIS | `O<index><letter>` | 1? | Returns the item in the index of the first parameter in the OEIS sequence `<letter><possible leading zeroes><index>`, if implemented (see `oeis.py`)
+| Input Function | `I` | 1 | Returns the input at the position of the first parameter
 | Logarithm | `l` | 1 or 2 | If there is no second parameter, returns the natural logarithm (base `e` logarithm) of the first parameter. Otherwise, returns the base [second-parameter] logarithm of the first parameter
-| Multiline | `\0` to `\9` | 1 to many | Returns the result of the cQuents program at the (0-based) index of the function, with the function parameters passed as input to it
+| Length | `L` | 1 or 2 | Returns the length of the first parameter, including the decimal point if there is a second parameter
+| OEIS | `O<index><letter>` | 1? | Returns the item in the index of the first parameter in the OEIS sequence `<letter><possible leading zeroes><index>`, if implemented (see `oeis.py`)
 | Next Prime | `p` | 1 | Returns the next prime **after** the first parameter
+| Previous Function | `P` | 1 | Returns the previous term back as many terms as the first parameter
 | Root | `r` | 1 or 2 | If there is no second parameter, returns the square root of the first parameter. Otherwise, returns the first parameter to the power of the reciprocal of the second parameter
+| Round | `R` | 1 | Returns the first parameter, rounded
+| Ceiling | `T` | 1 | Returns the ceil of the first parameter
+| Absolute Value | `v` | 1 | Returns the absolute value of the first parameter
+| Exp | `x` | 1 | Returns e to the power of the first parameter
 | Cosine | `\c` | 1 | Returns the cos of the first parameter
 | Logarithm 2 | `\l` | 1 | Returns the base `10` logarithm of the first parameter
+| Reverse | `\r` | 1 or 2 | Returns the reverse of the first parameter, including the decimal point if there is a second parameter
+| Rotate | `\R` | 2 or 3 | Returns the first parameter rotated by the second parameter, including the decimal point if there is a third parameter
 | Sine | `\s` | 1 | Returns the sin of the first parameter
 | Tangent | `\t` | 1 | Returns the tan of the first parameter
-
-**Multiline Builtins**
-
-`\0` to `\9` call the cQuents program on the (0-indexed) line with the input given and return its output.
 
 **OEIS**
 
