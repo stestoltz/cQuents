@@ -50,22 +50,18 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  A   | First input:     input[0]
  B   | Second input:    input[1]
  C   | Third input:     input[2]
- D   | Fourth input:    input[3]
- E   | Fifth input:     input[4]
  z   | Previous item in sequence: sequence[-1] || 0
  y   | Second previous item in sequence: sequence[-2] || 0
  x   | Third previous item in sequence: sequence[-3] || 0
- w   | Fourth previous item in sequence: sequence[-4] || 0
- v   | Fifth previous item in sequence: sequence[-5] || 0
 
 -----| Unary Operators
  +   | Plus:             +x
  -   | Negation:         -x
- b~  | Bitwise invert:   b~x
- bl  | Rotate left:      blx
- br  | Rotate right:     brx
- b+  | Add one:          b+x
- b-  | Subtract one:     b-x
+ ~   | Bitwise invert:   ~x
+ _l  | Rotate left:      _lx
+ _r  | Rotate right:     _rx
+ _+  | Add one:          _+x
+ _-  | Subtract one:     _-x
 
 -----| Post-Unary Operators
  !   | Factorial:        x!
@@ -76,18 +72,18 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  +   | Addition:         x+ 
  -   | Subtraction:      x-y
  /   | Division:         x/y
- //  | Integer (floor) division: x//y
+ _/  | Integer (floor) division: x_/y
  ^   | Exponent:         x^y
  ~   | Concatenation:    x~y
  e   | Scientific Notation: xey
- b|  | Bitwise or:       xb|y
- bn  | Bitwise nor:      xbny
- b^  | Bitwise xor:      xb^y
- bx  | Bitwise xnor:     xbny
- b&  | Bitwise and:      xb&y
- bN  | Bitwise nand:     xbNy
- b<  | Bitwise left shift: xb<y
- b>  | Bitwise right shift: xb>y
+ _|  | Bitwise or:       x_|y
+ _n  | Bitwise nor:      x_ny
+ _^  | Bitwise xor:      x_^y
+ _x  | Bitwise xnor:     x_ny
+ _&  | Bitwise and:      x_&y
+ _N  | Bitwise nand:     x_Ny
+ _<  | Bitwise left shift: x_<y
+ _>  | Bitwise right shift: x_>y
 
 -----| Functions
  a   | Absolute value:   ax)
@@ -102,31 +98,20 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  R   | Round:            Rx)
  X   | Exp:              Xx)
  \c  | Cosine:           \cx)
- \l  | Log 10:           lx)
+ \l  | Log 10:           \lx)
  \r  | Reverse:          \rx[,y]) (if y exists, include "." in reversal)
  \R  | Rotate:           \Rx,y[,z]) (+y goes right, -y goes left) (if z exists, move ".")
  \s  | Sine:             \sx)
  \t  | Tangent:          \tx)
- 
- \0  | Run First Line:   \0x)
- \1  | Run Second Line:  \1x)
- \2  | Run Third Line:   \2x)
- \3  | Run Fourth Line:  \3x)
- \4  | Run Fifth Line:   \4x)
- \5  | Run Sixth Line:   \5x)
- \6  | Run Seventh Line: \6x)
- \7  | Run Eighth Line:  \7x)
- \8  | Run Ninth Line:   \8x)
- \9  | Run Tenth Line:   \9x)
 
 -----| Constants
- _c  | Catalan's constant: Sum of 1/1^2 - 1/3^2 + 1/5^2 - 1/7^2 + ...
- _e  | e: Base of the natural logarithm
- _g  | Golden Ratio: .5 * (sqrt(5) + 1)
- _G  | Glaisher-Kinkelin constant
- _k  | Khinchin's constant
- _p  | pi: Circumference divided by diameter in a perfect circle
- _y  | Euler-Mascheroni constant: limiting difference between the harmonic series and the natural logarithm
+ `c  | Catalan's constant: Sum of 1/1^2 - 1/3^2 + 1/5^2 - 1/7^2 + ...
+ `e  | e: Base of the natural logarithm
+ `g  | Golden Ratio: .5 * (sqrt(5) + 1)
+ `G  | Glaisher-Kinkelin constant
+ `k  | Khinchin's constant
+ `p  | pi: Circumference divided by diameter in a perfect circle
+ `y  | Euler-Mascheroni constant: limiting difference between the harmonic series and the natural logarithm
  
  #TODO: GCD, LCM, toBase, more trig functions, 
 
@@ -164,61 +149,62 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  >   |
  ?   | (mode query)
  @   | literal escape
- A   |
- B   |
- C   |
+ A   | first input
+ B   | second input
+ C   | third input
  D   |
  E   |
- F   |
+ F   | floor
  G   | #GCD
  H   |
- I   |
+ I   | input func
  J   |
  K   |
- L   |
+ L   | length
  M   | #LCM
  N   |
  O   |
- P   |
+ P   | previous func
  Q   |
- R   |
+ R   | round
  S   |
- T   |
+ T   | ceiling
  U   |
  V   |
  W   |
- Y   |
- Z   |
+ X   | third previous term
+ Y   | second previous term
+ Z   | previous term
  [   |
  \   | extra builtins start
  ]   |
  ^   | exponentiation
  _   | extra operators start
  `   | constants start
- a   |
- b   |
- c   |
- d   |
- e   |
- f   |
+ a   | first line
+ b   | second line
+ c   | third line
+ d   | lines func
+ e   | scientific notation
+ f   | factorial
  g   |
  h   |
  i   |
  j   |
  k   |
- l   |
+ l   | logarithm (default base e)
  m   |
- n   |
+ n   | input n
  o   |
- p   |
+ p   | next prime
  q   |
- r   |
+ r   | root
  s   |
- t   |
+ t   | ten
  u   |
- v   |
+ v   | absolute value
  w   |
- x   |
+ x   | exp
  y   |
  z   |
  {   |

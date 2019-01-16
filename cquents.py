@@ -85,9 +85,10 @@ NEWLINE_CHAR = "\n"
 
 N = "n"
 CURRENT = "$"
-input_ids = ["A", "B", "C", "D", "E"]
-previous_ids = ["z", "y", "x", "w", "v"]
-variables = [N, CURRENT] + input_ids + previous_ids
+TEN = "t"
+input_ids = ["A", "B", "C"]
+previous_ids = ["Z", "Y", "X"]
+variables = [N, CURRENT, TEN] + input_ids + previous_ids
 
 def is_variable(x): return x in variables
 
@@ -110,17 +111,28 @@ def is_constant(x): return x in constants
 
 """ BUILTINS """
 
+def get_line(origin_interpreter, parameters, index):
+    next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in parameters]
+
+    return origin_interpreter.lines[index].interpreter.interpret(next_parameters)
+
 builtins = {
-    "a": lambda inter, node: abs(inter.visit(node.parameters[0])),
-    "c": lambda inter, node: math.ceil(inter.visit(node.parameters[0])),
+    "a": lambda inter, node: get_line(inter, node.parameters, 0),
+    "b": lambda inter, node: get_line(inter, node.parameters, 1),
+    "c": lambda inter, node: get_line(inter, node.parameters, 2),
+    "d": lambda inter, node: get_line(inter, node.parameters[1:], int(inter.visit(node.parameters[0]))),
     "f": lambda inter, node: math.factorial(inter.visit(node.parameters[0])),
     "F": lambda inter, node: math.floor(inter.visit(node.parameters[0])),
+    "I": lambda inter, node: inter.get_input(inter.visit(node.parameters[0])),
     "l": lambda inter, node: builtin_helper.log(inter, node.parameters),
     "L": lambda inter, node: builtin_helper.length(inter, node.parameters),
     "p": lambda inter, node: builtin_helper.next_prime(inter.visit(node.parameters[0])),
+    "P": lambda inter, node: inter.get_previous(inter.visit(node.parameters[0])),
     "r": lambda inter, node: builtin_helper.root(inter, node.parameters),
     "R": lambda inter, node: round(inter.visit(node.parameters[0])),
-    "X": lambda inter, node: math.exp(inter.visit(node.parameters[0]))
+    "T": lambda inter, node: math.ceil(inter.visit(node.parameters[0])),
+    "v": lambda inter, node: abs(inter.visit(node.parameters[0])),
+    "x": lambda inter, node: math.exp(inter.visit(node.parameters[0]))
 }
 
 EXTRA_BUILTINS = "\\"   # all have \ appended to beginning of command
@@ -134,18 +146,9 @@ extra_builtins = {
     EXTRA_BUILTINS + "t": lambda inter, node: math.tan(inter.visit(node.parameters[0]))
 }
 
-def get_line(origin_interpreter, node, index):
-    next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in node.parameters]
-
-    return origin_interpreter.lines[index].interpreter.interpret(next_parameters)
-
-
 def get_OEIS(origin_interpreter, parameters, cq_source):
     next_parameters = [get_input_item_tree(origin_interpreter.visit(parameter)) for parameter in parameters]
     return run(cq_source, next_parameters, is_oeis=True)
-
-# functions for other lines
-extra_builtins.update({EXTRA_BUILTINS + str(line_number): lambda inter, node, line_number=line_number: get_line(inter, node, line_number) for line_number in range(10)})
 
 #FIXME: Global lines object causes bugs when doing this
 builtins.update({sequence: lambda inter, node, sequence=sequence: get_OEIS(inter, node.parameters, oeis.OEIS[sequence]) for sequence in oeis.OEIS})
@@ -693,7 +696,7 @@ class Tester(NodeVisitor):
         self.visit(node.expr)
 
     def visit_Var(self, node):
-        if is_variable(node.name):
+        if node.name in input_ids:
             code = get_input_val(node.name)
             if self.max_input < code:
                 self.max_input = code
@@ -713,6 +716,18 @@ class Interpreter(NodeVisitor):
         self.program = None
         self.join = TERM_SEPARATOR
 
+    # 0 is last, 1 is second last, etc.
+    def get_previous(self, num):
+        try:
+            temp = self.sequence[-1 - num]
+        except IndexError:
+            temp = 0
+        return temp
+
+    # 0 is first input, 1 is second input, etc.
+    def get_input(self, num):
+        return self.visit(self.input[num])
+
     def visit_Program(self, node):
         do_prints = not isinstance(self, HelperInterpreter)
 
@@ -726,7 +741,7 @@ class Interpreter(NodeVisitor):
 
         input_length_difference = actual_input_length - expected_input_length
 
-        if input_length_difference == 0 or input_length_difference == 1:
+        if input_length_difference >= 0:
             all_input = []
 
             all_input.extend(node.input_front)
@@ -734,7 +749,7 @@ class Interpreter(NodeVisitor):
             all_input.extend(node.input_back)
 
             n = None
-            if input_length_difference == 1:
+            if input_length_difference >= 1:
                 n = all_input.pop()
 
             self.input = all_input
@@ -864,16 +879,14 @@ class Interpreter(NodeVisitor):
     def visit_Var(self, node):
         if node.name == CURRENT:
             return self.current
-        if node.name == N:
+        elif node.name == N:
             return self.n
+        elif node.name == TEN:
+            return 10
         elif node.name in previous_ids:
-            try:
-                temp = self.sequence[-1 + ord(node.name) - 122]
-            except IndexError:
-                temp = 0
-            return temp
+            return self.get_previous(previous_ids.index(node.name))
         elif node.name in input_ids:
-            return self.visit(self.input[get_input_val(node.name)])
+            return self.get_input(input_ids.index(node.name))
 
     def visit_Number(self, node):
         return node.value
