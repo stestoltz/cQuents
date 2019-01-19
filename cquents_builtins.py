@@ -1,3 +1,4 @@
+from cquents_core import *
 import math
 import itertools
 
@@ -57,10 +58,16 @@ def log(origin_interpreter, parameters):
 def concat(x, y):
     # what to do with negatives/floats?
     res = str(x) + str(y)
+
+    # both are ints: return int
     if type(x) is type(y) is int and y > 0:
         return int(res)
 
-    # raise CQConcatError("Error concatenating " + str(type(x)) + ":" + str(x) + " and " + str(type(y)) + ":" + str(y))
+    # one int, one str: return str
+    elif (type(x) is str or type(y) is str) and (type(x) is int or type(y) is int):
+        return res
+
+    raise CQConcatError("Error concatenating " + str(type(x)) + ":" + str(x) + " and " + str(type(y)) + ":" + str(y))
 
 
 def length(origin_interpreter, parameters):

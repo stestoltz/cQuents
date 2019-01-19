@@ -1,6 +1,7 @@
+from cquents_core import *
+import math
 import cquents_builtins as builtin_helper
 import re
-import math
 import sys
 
 import oeis
@@ -123,9 +124,11 @@ builtins = {
     "d": lambda inter, node: get_line(inter, node.parameters[1:], int(inter.visit(node.parameters[0]))),
     "f": lambda inter, node: math.factorial(inter.visit(node.parameters[0])),
     "F": lambda inter, node: math.floor(inter.visit(node.parameters[0])),
+    "h": lambda inter, node: chr(inter.visit(node.parameters[0])),
     "I": lambda inter, node: inter.get_input(inter.visit(node.parameters[0])),
     "l": lambda inter, node: builtin_helper.log(inter, node.parameters),
     "L": lambda inter, node: builtin_helper.length(inter, node.parameters),
+    "o": lambda inter, node: ord(inter.visit(node.parameters[0])),
     "p": lambda inter, node: builtin_helper.next_prime(inter.visit(node.parameters[0])),
     "P": lambda inter, node: inter.get_previous(inter.visit(node.parameters[0])),
     "r": lambda inter, node: builtin_helper.root(inter, node.parameters),
@@ -272,26 +275,6 @@ class Sequence:
             return int(self.interpreter.join.join([str(x) for x in self.sequence])[self.current - 1])
 
         return cur_val
-
-
-class CQError(Exception):
-    pass
-
-
-class CQSyntaxError(CQError):
-    pass
-
-
-class CQInputError(CQError):
-    pass
-
-
-class CQInternalError(CQError):
-    pass
-
-
-class CQConcatError(CQError):
-    pass
 
 
 def get_input_val(char):
@@ -648,6 +631,9 @@ class Parser:
             node = Builtin(builtin, node_list)
         elif tok.type == ID:
             node = self.variable()
+        elif tok.type == LITERAL:
+            self.eat(LITERAL)
+            node = Literal(tok)
         else:
             raise CQSyntaxError("Unknown factor : " + (tok.val or tok.type))
 
@@ -891,6 +877,9 @@ class Interpreter(NodeVisitor):
     def visit_Number(self, node):
         return node.value
 
+    def visit_Literal(self, node):
+        return node.value
+
     def interpret(self, input_):
         self.input = input_
 
@@ -902,98 +891,6 @@ class Interpreter(NodeVisitor):
 class HelperInterpreter(Interpreter):
     pass
 
-
-class Line:
-    def __init__(self, tree, interpreter):
-        self.tree = tree
-        self.interpreter = interpreter
-
-
-class Params:
-    def __init__(self, literals, default_input, start, current_start, is_stringed):
-        self.literals = literals
-        self.default_input = default_input
-        self.start = start
-        self.current_start = current_start
-        self.is_stringed = is_stringed
-
-
-class AST:
-    pass
-
-
-class Program(AST):
-    def __init__(self, parameters, mode, statements):
-        self.literals = parameters.literals
-        self.input_front = parameters.default_input[0]
-        self.input_back = parameters.default_input[1]
-        self.start = parameters.start
-        self.current_start = parameters.current_start
-        self.mode = mode
-        self.statements = statements
-        self.is_stringed = parameters.is_stringed
-
-    def __str__(self):
-        return "<Program: " + ",".join([str(x) for x in self.statements]) + ">"
-
-
-class BinOp(AST):
-    def __init__(self, left, op, right):
-        self.left = left
-        self.op = op
-        self.right = right
-
-    def __str__(self):
-        return "<BinOp: " + str(self.op) + " " + str(self.left) + " " + str(self.right) + ">"
-
-
-class Constant(AST):
-    def __init__(self, name):
-        self.name = name
-
-    def __str__(self):
-        return "<Constant: " + self.name + ">"
-
-
-class Builtin(AST):
-    def __init__(self, builtin, parameters):
-        self.builtin = builtin
-        self.parameters = parameters
-
-    def __str__(self):
-        return "<Builtin: " + self.builtin + " " + ",".join([str(x) for x in self.parameters]) + ">"
-
-
-class UnaryOp(AST):
-    def __init__(self, op, expr):
-        self.op = op
-        self.expr = expr
-
-    def __str__(self):
-        return "<UnaryOp: " + str(self.op) + " " + str(self.expr) + ">"
-
-
-class PostUnaryOp(UnaryOp):
-    def __str__(self):
-        return "<PostUnaryOp: " + str(self.expr) + " " + str(self.op) + ">"
-
-
-class Var(AST):
-    def __init__(self, token):
-        self.token = token
-        self.name = token.val
-
-    def __str__(self):
-        return "<Var: " + str(self.token) + " " + self.name + ">"
-
-
-class Number(AST):
-    def __init__(self, token):
-        self.token = token
-        self.value = token.val
-
-    def __str__(self):
-        return "<Number: " + str(self.token) + " " + str(self.value) + ">"
 
 try:
     file = sys.argv[1]

@@ -50,9 +50,9 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  A   | First input:     input[0]
  B   | Second input:    input[1]
  C   | Third input:     input[2]
- z   | Previous item in sequence: sequence[-1] || 0
- y   | Second previous item in sequence: sequence[-2] || 0
- x   | Third previous item in sequence: sequence[-3] || 0
+ Z   | Previous item in sequence: sequence[-1] || 0
+ Y   | Second previous item in sequence: sequence[-2] || 0
+ X   | Third previous item in sequence: sequence[-3] || 0
 
 -----| Unary Operators
  +   | Plus:             +x
@@ -86,17 +86,23 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  _>  | Bitwise right shift: x_>y
 
 -----| Functions
- a   | Absolute value:   ax)
- c   | Ceil:             cx)
+ a   | Line 1:           a[...])
+ b   | Line 2:           b[...])
+ c   | Line 3:           c[...])
+ d   | Lines:            dx,[...])
  f   | Factorial:        fx)
  F   | Floor:            Fx)
+ I   | Input:            Ix)
  l   | Logarithm:        lx[,y]) (default y: _e)
  L   | Length:           Lx[,y]) (if y exists, include "." in count)
  O   | OEIS:             O<seqNum><seqLetter>x)
  p   | Next Prime (exclusive): px)
+ P   | Previous:         Px)
  r   | Root:             rx[,y]) (default y: 2)
  R   | Round:            Rx)
- X   | Exp:              Xx)
+ T   | Ceil:             Tx)
+ v   | Absolute value:   vx)
+ x   | Exp:              Xx)
  \c  | Cosine:           \cx)
  \l  | Log 10:           \lx)
  \r  | Reverse:          \rx[,y]) (if y exists, include "." in reversal)
@@ -188,14 +194,14 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  e   | scientific notation
  f   | factorial
  g   |
- h   |
+ h   | char
  i   |
  j   |
  k   |
  l   | logarithm (default base e)
  m   |
  n   | input n
- o   |
+ o   | ordinal
  p   | next prime
  q   |
  r   | root
