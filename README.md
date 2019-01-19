@@ -138,31 +138,35 @@ The character `_` signifies an two-byte operation.
 
 Builtin function are called with their identifier, a comma-delimited list of their parameters, and a closing parenthesis (`)`). Remember that trailing `)`s can be left off.
 
+For simplicity, in the descriptions, the individual parameters given to the functions are `a,b,c, ...`.
+
 | Name | Identifier | Parameters | Description
 | ---- | ---------- | ---------- | -----------
 | First Line | `a` | 1 to many | Returns the first line given the parameters as input
 | Second Line | `b` | 1 to many | Returns the second line given the parameters as input
 | Third Line | `c` | 1 to many | Returns the third line given the parameters as input
-| Line Function | `d` | 2 to many | Returns the line at the first parameter given the rest of the parameters
-| Factorial | `f` | 1 | Returns the factorial (`!`) of the first parameter
-| Floor | `F` | 1 | Returns the floor of the first parameter
-| Input Function | `I` | 1 | Returns the input at the position of the first parameter
-| Logarithm | `l` | 1 or 2 | If there is no second parameter, returns the natural logarithm (base `e` logarithm) of the first parameter. Otherwise, returns the base [second-parameter] logarithm of the first parameter
-| Length | `L` | 1 or 2 | Returns the length of the first parameter, including the decimal point if there is a second parameter
-| OEIS | `O<index><letter>` | 1? | Returns the item in the index of the first parameter in the OEIS sequence `<letter><possible leading zeroes><index>`, if implemented (see `oeis.py`)
-| Next Prime | `p` | 1 | Returns the next prime **after** the first parameter
-| Previous Function | `P` | 1 | Returns the previous term back as many terms as the first parameter
-| Root | `r` | 1 or 2 | If there is no second parameter, returns the square root of the first parameter. Otherwise, returns the first parameter to the power of the reciprocal of the second parameter
-| Round | `R` | 1 | Returns the first parameter, rounded
-| Ceiling | `T` | 1 | Returns the ceil of the first parameter
-| Absolute Value | `v` | 1 | Returns the absolute value of the first parameter
-| Exp | `x` | 1 | Returns e to the power of the first parameter
-| Cosine | `\c` | 1 | Returns the cos of the first parameter
-| Logarithm 2 | `\l` | 1 | Returns the base `10` logarithm of the first parameter
-| Reverse | `\r` | 1 or 2 | Returns the reverse of the first parameter, including the decimal point if there is a second parameter
-| Rotate | `\R` | 2 or 3 | Returns the first parameter rotated by the second parameter, including the decimal point if there is a third parameter
-| Sine | `\s` | 1 | Returns the sin of the first parameter
-| Tangent | `\t` | 1 | Returns the tan of the first parameter
+| Line Function | `d` | 2 to many | Returns the line at `a` given the rest of the parameters
+| Factorial | `f` | 1 | Returns the factorial (`!`) of `a`
+| Floor | `F` | 1 | Returns the floor of `a`
+| Char | `h` | 1 | Returns Python's `chr` of `a`
+| Input Function | `I` | 1 | Returns the input at the position of `a`
+| Logarithm | `l` | 1 or 2 | If `b` exists, returns the natural logarithm (base `e` logarithm) of `a`. Otherwise, returns the base `b` logarithm of `a`
+| Length | `L` | 1 or 2 | Returns the length of `a`, including the decimal point if `b` exists
+| OEIS | `O<index><letter>` | 1? | Returns the item in the index of `a` in the OEIS sequence `<letter><possible leading zeroes><index>`, if implemented (see `oeis.py`)
+| Ordinal | `o` | 1 | Returns Python's `ord` of `a`
+| Next Prime | `p` | 1 | Returns the next prime **after** `a`
+| Previous Function | `P` | 1 | Returns the previous term back as many terms as `a`
+| Root | `r` | 1 or 2 | If `b` does not exist, returns the square root of `a`. Otherwise, returns `a` to the power of the reciprocal of `b`
+| Round | `R` | 1 | Returns `a`, rounded
+| Ceiling | `T` | 1 | Returns the ceil of `a`
+| Absolute Value | `v` | 1 | Returns the absolute value of `a`
+| Exp | `x` | 1 | Returns e to the power of `a`
+| Cosine | `\c` | 1 | Returns the cos of `a`
+| Logarithm 2 | `\l` | 1 | Returns the base `10` logarithm of `a`
+| Reverse | `\r` | 1 or 2 | Returns the reverse of `a`, including the decimal point if `b` exists
+| Rotate | `\R` | 2 or 3 | Returns `a` rotated by `b``, including the decimal point if `c` exists
+| Sine | `\s` | 1 | Returns the sin of `a`
+| Tangent | `\t` | 1 | Returns the tan of `a`
 
 **OEIS**
 
@@ -181,6 +185,8 @@ When specifying literals, they are in the format `<front>|<between>|<back>`. You
 Literals are used when displaying your output. Front literals are prepended to your output, and back literals are appended to it. The default between literal is `,`. The between literal replaces `,` as the list delimiter.
 
 Once `#`, `=`, `$`, or `"` are read, the literals are done.
+
+If literals are used (with either `@` or `'`) after the above symbols are read, they will act like strings, and the interpreter will attempt to work with them as strings.
 
 ### Default Input
 
