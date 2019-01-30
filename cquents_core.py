@@ -23,7 +23,7 @@ class CQInternalError(CQError):
     pass
 
 
-class CQConcatError(CQError):
+class CQTypeError(CQError):
     pass
 
 

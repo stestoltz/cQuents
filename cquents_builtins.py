@@ -71,17 +71,22 @@ def concat(x, y):
     elif (type(x) is str or type(y) is str) and (type(x) is int or type(y) is int):
         return res
 
-    raise CQConcatError("Error concatenating " + str(type(x)) + ":" + str(x) + " and " + str(type(y)) + ":" + str(y))
+    raise CQTypeError("Error concatenating " + str(type(x)) + ":" + str(x) + " and " + str(type(y)) + ":" + str(y))
 
 
 def length(origin_interpreter, parameters):
-    str_ = str(origin_interpreter.visit(parameters[0]))
+    if isinstance(parameters[0], Literal):
+        return len(origin_interpreter.visit(parameters[0]))
+    elif isinstance(parameters[0], Number):
+        str_ = str(origin_interpreter.visit(parameters[0]))
 
-    str_ = str_.replace("-", "")
-    if len(parameters) == 1:
-        str_ = str_.replace(".", "")
+        str_ = str_.replace("-", "")
+        if len(parameters) == 1:
+            str_ = str_.replace(".", "")
 
-    return len(str_)
+        return len(str_)
+
+    raise CQTypeError("Error getting the length of a " + str(type(parameters[0])))
 
 
 def fill(origin_interpreter, parameters):
@@ -90,40 +95,44 @@ def fill(origin_interpreter, parameters):
 
 
 def reverse(origin_interpreter, parameters):
-    num = origin_interpreter.visit(parameters[0])
-    is_negative = num < 0
-    type_ = type(num)
-    keep_dot_position = len(parameters) == 1
+    if isinstance(parameters[0], Literal):
+        return origin_interpreter.visit(parameters[0])[::-1]
+    elif isinstance(parameters[0], Number):
+        num = origin_interpreter.visit(parameters[0])
+        is_negative = num < 0
+        type_ = type(num)
+        keep_dot_position = len(parameters) == 1
 
-    if type_ == int:
-        str_ = str(int(math.fabs(num)))
-    else:
-        str_ = str(math.fabs(num))
+        if type_ == int:
+            str_ = str(int(math.fabs(num)))
+        else:
+            str_ = str(math.fabs(num))
 
-    dot_index = str_.find(".")
+        dot_index = str_.find(".")
 
-    if ~dot_index and keep_dot_position:
-        str_ = str_.replace(".", "")
+        if ~dot_index and keep_dot_position:
+            str_ = str_.replace(".", "")
 
-    str_ = str_[::-1]
+        str_ = str_[::-1]
 
-    if ~dot_index:
-        if keep_dot_position:
-            str_ = str_[:dot_index] + "." + str_[dot_index:]
+        if ~dot_index:
+            if keep_dot_position:
+                str_ = str_[:dot_index] + "." + str_[dot_index:]
 
-        res = float(str_)
-    else:
-        res = int(str_)
+            res = float(str_)
+        else:
+            res = int(str_)
 
-    return -res if is_negative else res
+        return -res if is_negative else res
 
+    raise CQTypeError("Error reversing a " + str(type(parameters[0])))
 
 def rotate(origin_interpreter, parameters):
     return primitive_rotate(origin_interpreter.visit(parameters[0]), origin_interpreter.visit(parameters[1]), len(parameters) <= 2)
 
 
 #https://stackoverflow.com/a/8458282/7605753
-def primitive_rotate(num, rotation, keep_dot_position = True):
+def primitive_rotate(num, rotation, keep_dot_position=True):
     is_negative = num < 0
     type_ = type(num)
 
