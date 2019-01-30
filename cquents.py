@@ -75,7 +75,8 @@ rcontainers = [RPAREN]
 DECIMAL_POINT = "."
 
 LITERAL_ESCAPE = "@"
-LITERAL_QUOTE = "'"
+LITERAL_QUOTE_1 = "'"
+LITERAL_QUOTE_2 = '"'
 
 OEIS_START = "O"
 
@@ -383,9 +384,10 @@ class Lexer:
         if self.cur == LITERAL_ESCAPE:
             self.advance()
             return Token(LITERAL, self.advance())
-        elif self.cur == LITERAL_QUOTE:
+        elif self.cur == LITERAL_QUOTE_1 or self.cur == LITERAL_QUOTE_2:
+            quote = self.cur
             self.advance()
-            temp = self.read_literal()
+            temp = self.read_literal(quote)
             self.advance()
             return temp
         elif self.cur == NEWLINE_CHAR:
@@ -434,10 +436,10 @@ class Lexer:
 
         return Token(NUMBER, int(result))
 
-    def read_literal(self):
+    def read_literal(self, quote):
         result = ""
 
-        while self.cur is not None and self.cur != LITERAL_QUOTE:
+        while self.cur is not None and self.cur != quote:
             result += self.cur
             self.advance()
 
@@ -804,7 +806,13 @@ class Interpreter(NodeVisitor):
                             print(val, end=self.join, flush=node.is_stringed)
 
                 elif node.mode == SERIES:
-                    sum_ += val
+                    try:
+                        sum_ += val
+                    except TypeError:
+                        if sum_ == 0:
+                            sum_ = ""
+                    finally:
+                        sum_ += val
 
                     if query_n:
                         if n == self.current:

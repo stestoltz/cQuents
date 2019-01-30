@@ -63,6 +63,10 @@ def concat(x, y):
     if type(x) is type(y) is int and y > 0:
         return int(res)
 
+    # both are strs: return str
+    elif type(x) is type(y) is str:
+        return res
+
     # one int, one str: return str
     elif (type(x) is str or type(y) is str) and (type(x) is int or type(y) is int):
         return res

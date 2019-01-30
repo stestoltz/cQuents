@@ -125,7 +125,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  \n  | (Literal newline) start new program on next line; can be called with \0 to \9
 ' '  | (Space) 
  !   | Factorial
- "   | (param stringify)
+ "   | (param stringify) literal quotes
  #   | (param default input)
  $   | current index
  %   | modulus
