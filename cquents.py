@@ -87,10 +87,11 @@ NEWLINE_CHAR = "\n"
 
 N = "n"
 CURRENT = "$"
+K = "k"
 TEN = "t"
 input_ids = ["A", "B", "C"]
 previous_ids = ["Z", "Y", "X"]
-variables = [N, CURRENT, TEN] + input_ids + previous_ids
+variables = [N, CURRENT, K, TEN] + input_ids + previous_ids
 
 def is_variable(x): return x in variables
 
@@ -248,6 +249,7 @@ class Sequence:
         self.node = node
         self.current = 0
         self.statement_index = 0
+        self.k = 1
         self.sequence = []
 
     def __getitem__(self, index):
@@ -256,6 +258,7 @@ class Sequence:
     def __iter__(self):
         self.current = 0
         self.statement_index = 0
+        self.k = 1
         self.sequence = []
         return self
 
@@ -265,6 +268,7 @@ class Sequence:
         else:
             if self.statement_index >= len(self.node.statements):
                 self.statement_index = 0
+                self.k += 1
 
             cur_val = self.interpreter.visit(self.node.statements[self.statement_index])
             self.statement_index += 1
@@ -874,6 +878,8 @@ class Interpreter(NodeVisitor):
     def visit_Var(self, node):
         if node.name == CURRENT:
             return self.current
+        elif node.name == K:
+            return self.sequence.k
         elif node.name == N:
             return self.n
         elif node.name == TEN:

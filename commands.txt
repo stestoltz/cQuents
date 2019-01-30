@@ -198,7 +198,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  h   | char
  i   |
  j   |
- k   |
+ k   | like $, but if there are multiple terms, it only increments when the terms reset
  l   | logarithm (default base e)
  m   |
  n   | input n
