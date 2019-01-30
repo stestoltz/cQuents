@@ -65,6 +65,7 @@ The following variables are currently valid identifiers:
 | Previous | `X` to `Z` | Gets the most recent (`Z`) to third most recent (`X`) terms in the sequence. This means terms that have already been calculated. Defaults to `0`.
 | Current | `$` | Gets what term we are currently calculating in the sequence, starting with the starting index, if set, or `1`.
 | n | `n` | Gets n, if provided
+| k | `k` | Starts at 1 and increments whenever the terms list resets
 | Ten | `t` | Evaluates to 10
 
 #### Constants
@@ -73,6 +74,9 @@ The character `` ` `` signifies that the next char will be a constant identifier
 
 | Name | Syntax | ~Value | Description
 | ---- | ------ | ------ | -----------
+| 1/2 | `` `2`` | `1/2` | 1/2
+| 1/3 | `` `3`` | `1/3` | 1/3
+| 1/4 | `` `4`` | `1/4` | 1/4
 | Catalan's constant | `` `c`` | `0.915965594177219` | Sum of 1 - 1/9 + 1/25 - 1/49 + ...
 | e | `` `e`` | `2.718281828459045` | Currently equals Python's `math.e`
 | Golden Ratio | `` `g`` | `1.618033988749895` | `.5 * (math.sqrt(5) + 1)`
@@ -161,6 +165,7 @@ For simplicity, in the descriptions, the individual parameters given to the func
 | Previous Function | `P` | 1 | Returns the previous term back as many terms as `a`
 | Root | `r` | 1 or 2 | If `b` does not exist, returns the square root of `a`. Otherwise, returns `a` to the power of the reciprocal of `b`
 | Round | `R` | 1 | Returns `a`, rounded
+| String | `S` | 1 | Returns `a` converted to a string
 | Ceiling | `T` | 1 | Returns the ceil of `a`
 | Absolute Value | `v` | 1 | Returns the absolute value of `a`
 | Exp | `x` | 1 | Returns e to the power of `a`

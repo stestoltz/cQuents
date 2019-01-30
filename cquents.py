@@ -100,6 +100,9 @@ def is_variable(x): return x in variables
 
 CONSTANTS = "`"     # all have ` appended to beginning of command
 constants = {
+    CONSTANTS + "2": 1/2,
+    CONSTANTS + "3": 1/3,
+    CONSTANTS + "4": 1/4,
     CONSTANTS + "c": 0.915965594177219,
     CONSTANTS + "e": math.e,
     CONSTANTS + "g": .5 * (math.sqrt(5) + 1),
@@ -135,6 +138,7 @@ builtins = {
     "P": lambda inter, node: inter.get_previous(inter.visit(node.parameters[0])),
     "r": lambda inter, node: builtin_helper.root(inter, node.parameters),
     "R": lambda inter, node: round(inter.visit(node.parameters[0])),
+    "S": lambda inter, node: str(inter.visit(node.parameters[0])),
     "T": lambda inter, node: math.ceil(inter.visit(node.parameters[0])),
     "v": lambda inter, node: abs(inter.visit(node.parameters[0])),
     "x": lambda inter, node: math.exp(inter.visit(node.parameters[0]))
@@ -479,7 +483,7 @@ class Parser:
             if type_ == EOF or (type_ == RCONTAINER and self.token.type in (EOF, NEWLINE, TERM_SEPARATOR)):
                 return
 
-            raise CQSyntaxError("Incorrect token found: looking for " + type_ + ", found " + self.token.type + " | " + self.token.val + " at " + self.lexer.pos)
+            raise CQSyntaxError("Incorrect token found: looking for " + type_ + ", found " + self.token.type + " " + self.token.val + " at " + str(self.lexer.pos))
 
     def parse(self):
         lines_ = [self.program()]
