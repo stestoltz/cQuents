@@ -166,7 +166,8 @@ def is_builtin(x): return x in builtins
 unary_ops = {
     "-": lambda x: -x,
     "+": lambda x: +x,
-    "~": lambda x: ~x
+    "~": lambda x: ~x,
+    "/": lambda x: 1/x
 }
 post_unary_ops = {
     "!": lambda x: math.factorial(x)

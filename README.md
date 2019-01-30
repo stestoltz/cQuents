@@ -83,21 +83,24 @@ The character `` ` `` signifies that the next char will be a constant identifier
 
 #### Operations
 
+For simplicity, in the descriptions, the expression to the left of the operator is called `x` and the expression to the left of the operator is called `y`.
+
 | Type | Name | Syntax | Description
 | ---- | ---- | ------ | -----------
 | Container | Parentheses | `(`code`)`\* | Acts like usual mathematical parentheses: surrounds a group of code and elevates it in the order of operations
-| Unary | Negation | `-` | Negates the right side (only occurs when there is no left side)
-| Unary | Positive | `+` | Positive of the right side (only occurs when there is no left side, can be used to convert non-number to number)
-| Unary | Bitwise Not | `~` | The negative of (the right side plus one)
-| Post-Unary | Factorial | `!` | The factorial of the left side
-| Binary | Addition | `+` | Adds the left side to the right side
-| Binary | Subtraction | `-` | Subtracts the right side from the left side
-| Binary | Concatentation | `~` | Concatenaties the right side to the left side
-| Binary | Multiplication | `*`, implicit | Multiplies the left side by the right side; can be used implicitly, as in Algebra: `2z`, `2(1+$)`
-| Binary | Division | `/` | Divides the left side by the right side
-| Binary | Exponentation | `^` | Returns the left side to the power of the right side
-| Binary | Modulus | `%` | Gets the left side mod the right side
-| Binary | Scientific | `e` | Returns the left side times ten to the power of the right side
+| Unary | Negation | `-` | Negates `y` (only occurs when there is no `x`)
+| Unary | Positive | `+` | Positive of `y` (only occurs when there is no `x`, can be used to convert non-numbers to numbers)
+| Unary | Bitwise Not | `~` | The negative of (`y` plus one) (only occurs when there is no `x`)
+| Unary | Reciprocal | `/` | One divided by `y` (only occurs when there is no `x`)
+| Post-Unary | Factorial | `!` | The factorial of `x`
+| Binary | Addition | `+` | Adds `x` to `y`
+| Binary | Subtraction | `-` | Subtracts `y` from `x`
+| Binary | Concatentation | `~` | Concatenates `y` to `x`
+| Binary | Multiplication | `*`, implicit | Multiplies `x` by `y`; can be used implicitly, as in Algebra: `2z`, `2(1+$)`
+| Binary | Division | `/` | Divides `x` by `y`
+| Binary | Exponentation | `^` | Returns `x` to the power of `y`
+| Binary | Modulus | `%` | Gets `x` mod `y`
+| Binary | Scientific | `e` | Returns `x` times ten to the power of `y`
 
 \* note that trailing `)`s right before the end of your code can all be left off
 
@@ -107,11 +110,11 @@ The character `_` signifies an two-byte operation.
 
 | Type | Name | Syntax | Description
 | ---- | ---- | ------ | -----------
-| Unary | Rotate Left | `_l` | Rotates the right side left once
-| Unary | Rotate Right | `_r` | Rotates the right side right once
-| Unary | Increment | `_+` | Adds one to the right side
-| Unary | Decrement | `_-` | Subtracts one from the right side
-| Binary | Integer Division | `_/` | Integer divides the left side by the right side\
+| Unary | Rotate Left | `_l` | Rotates `y` left once
+| Unary | Rotate Right | `_r` | Rotates `y` right once
+| Unary | Increment | `_+` | Adds one to `y`
+| Unary | Decrement | `_-` | Subtracts one from `y`
+| Binary | Integer Division | `_/` | Integer divides `x` by `y`
 | Binary | Bitwise OR | `_\|` | .
 | Binary | Bitwise NOR | `_n` | .
 | Binary | Bitwise XOR | `_^` | .
