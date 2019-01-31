@@ -71,9 +71,10 @@ CONDITIONAL_N = "N"
 CURRENT = "$"
 K = "k"
 TEN = "t"
+SMALLEST = "w"
 input_ids = ["A", "B", "C"]
 previous_ids = ["Z", "Y", "X"]
-variables = [N, CONDITIONAL_N, CURRENT, K, TEN] + input_ids + previous_ids
+variables = [N, CONDITIONAL_N, CURRENT, K, TEN, SMALLEST] + input_ids + previous_ids
 
 def is_variable(x): return x in variables
 
@@ -147,6 +148,7 @@ extra_builtins = {
     EXTRA_BUILTINS + "R": lambda inter, node: builtin_helper.rotate(inter, node.parameters),
     EXTRA_BUILTINS + "s": lambda inter, node: math.sin(inter.visit(node.parameters[0])),
     EXTRA_BUILTINS + "t": lambda inter, node: math.tan(inter.visit(node.parameters[0])),
+    EXTRA_BUILTINS + "w": lambda inter, node: builtin_helper.smallest(inter.sequence.sequence, inter.visit(node.parameters[0])),
     EXTRA_BUILTINS + "z": lambda inter, node: builtin_helper.proper_divisors(inter.visit((node.parameters[0])))
 }
 
@@ -959,6 +961,8 @@ class Interpreter(NodeVisitor):
             # TODO: default functionality
         elif node.name == TEN:
             return 10
+        elif node.name == SMALLEST:
+            return builtin_helper.smallest(self.sequence.sequence, 1)
         elif node.name in previous_ids:
             return self.get_previous(previous_ids.index(node.name))
         elif node.name in input_ids:

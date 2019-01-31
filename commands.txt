@@ -207,7 +207,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  T   | ceiling
  U   | sum
  V   | average
- W   | # positive integers not yet in sequence, smallest to largest
+ W   |
  X   | third previous term
  Y   | second previous term
  Z   | previous term
@@ -239,7 +239,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  t   | ten
  u   | count
  v   | absolute value
- w   | # smallest positive integer not yet in sequence
+ w   | smallest positive integer not yet in sequence
  x   | exp
  y   |
  z   | divisors

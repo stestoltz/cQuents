@@ -68,6 +68,7 @@ The following variables are currently valid identifiers:
 | n | `n` | Gets n, if provided
 | k | `k` | Starts at 1 and increments whenever the terms list resets
 | Ten | `t` | Evaluates to 10
+| Smallest | `w` | Evaluates to the smallest positive integer not yet in the sequence
 
 #### Constants
 
@@ -201,6 +202,7 @@ For simplicity, in the descriptions, the individual parameters given to the func
 | Rotate | `\R` | 2 or 3 | Returns `a` rotated by `b`, including the decimal point if `c` exists
 | Sine | `\s` | 1 | Returns the sin of `a`
 | Tangent | `\t` | 1 | Returns the tan of `a`
+| Smallest | `\w` | 1 | Returns the `a`th smallest positive integer not yet in the sequence
 | Proper Divisors | `\z` | 1 | Returns the proper divisors of `a`
 
 **OEIS**

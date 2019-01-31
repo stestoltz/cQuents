@@ -282,3 +282,14 @@ def prime_factors(x):
         factors.append(x)
     return factors
 
+
+# TODO: optimize
+def smallest(lst, n):
+    i = 1
+    found = 0
+    while True:
+        if i not in lst:
+            found += 1
+            if found >= n:
+                return i
+        i += 1
