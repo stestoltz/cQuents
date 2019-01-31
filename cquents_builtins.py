@@ -293,3 +293,37 @@ def smallest(lst, n):
             if found >= n:
                 return i
         i += 1
+
+
+ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/"
+
+
+def to_base(origin_interpreter, parameters):
+    base = 2 if len(parameters) == 1 else origin_interpreter.visit(parameters[1])
+
+    in_num = int(origin_interpreter.visit(parameters[0]))
+
+    out_str = ""
+    while in_num:
+        out_str = ALPHABET[in_num % base] + out_str
+        in_num //= base
+
+    return out_str
+
+
+def from_base(origin_interpreter, parameters):
+    base = 2 if len(parameters) == 1 else origin_interpreter.visit(parameters[1])
+
+    in_num = origin_interpreter.visit(parameters[0])
+
+    try:
+        in_num[0]
+    except TypeError:
+        in_num = str(in_num)
+
+    out_num = 0
+    for i, char in enumerate(in_num):
+        column = len(in_num) - 1 - i
+        out_num += ALPHABET.index(char) * (base ** column)
+
+    return out_num

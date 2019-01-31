@@ -180,6 +180,8 @@ For simplicity, in the descriptions, the individual parameters given to the func
 | Char | `h` | 1 | Returns Python's `chr` of `a`
 | Input Function | `I` | 1 | Returns the input at the position of `a`
 | Join | `j` | 1 or 2 | Returns `a` joined on `b` (if there is no `b`, defaults to `""`)
+| To Base | `J` | 1 or 2 | Returns `a` to base `b` (if there is no `b`, defaults to base `2`)
+| From Base | `K` | 1 or 2 | Returns `a` from base `b` (if there is no `b`, default to base `2`)
 | Logarithm | `l` | 1 or 2 | If `b` exists, returns the natural logarithm (base `e` logarithm) of `a`. Otherwise, returns the base `b` logarithm of `a`
 | Length | `L` | 1 or 2 | Returns the length of `a`, including the decimal point if `b` exists
 | Min | `m` | 1 | Returns the minimum of `a`

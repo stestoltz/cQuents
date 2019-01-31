@@ -107,6 +107,8 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  F   | Floor:            Fx)
  I   | Input:            Ix)
  j   | Join:             j{...}[,x]) (default x: "")
+ J   | To Base:          Jx[,y]) (default y: 2)
+ K   | From Base:        Kx[,y]) (default y: 2)
  l   | Logarithm:        lx[,y]) (default y: _e)
  L   | Length:           Lx[,y]) (if y exists, include "." in count)
  m   | Min:              m{...})
@@ -194,8 +196,8 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  G   | # GCD
  H   |
  I   | input func
- J   | # to base
- K   |
+ J   | to base
+ K   | from base
  L   | length
  M   | max
  N   | current value in conditional
