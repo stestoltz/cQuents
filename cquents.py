@@ -55,6 +55,7 @@ conditionals = (IFTRUE,)
 
 APPLIER = "E"
 
+TERNARY = "?"
 COLON = ":"
 
 DECIMAL_POINT = "."
@@ -413,6 +414,9 @@ class Lexer:
         elif self.cur == COLON:
             return Token(COLON, self.advance())
 
+        elif self.cur == TERNARY:
+            return Token(TERNARY, self.advance())
+
         if self.cur == LITERAL_ESCAPE:
             self.advance()
             return Token(LITERAL, self.advance())
@@ -641,12 +645,24 @@ class Parser:
         self.eat(ID)
         return node
 
+    def expr(self):
+        node = self.term()
+
+        while self.token.type == TERNARY:
+            self.eat(TERNARY)
+            middle_node = self.term()
+            self.eat(COLON)
+            end_node = self.term()
+            node = Ternary(node, middle_node, end_node)
+
+        return node
+
     # call expr for each layer of precedence, end with call to factor
-    def expr(self, cur_precedence=0):
+    def term(self, cur_precedence=0):
         next_precedence = cur_precedence + 1
 
         if next_precedence < len(binary_operator_precedence):
-            def next_layer(): return self.expr(next_precedence)
+            def next_layer(): return self.term(next_precedence)
         else:
             def next_layer(): return self.factor()
 
@@ -719,14 +735,19 @@ class Parser:
 
         post_tok = self.token
 
-        if post_tok.type == OPERATOR and post_tok.val in post_unary_ops:
-            self.eat(OPERATOR)
-            node = PostUnaryOp(post_tok, node)
-        elif post_tok.type == LCONTAINER and post_tok.val == LINDEX:
-            self.eat(LCONTAINER)
-            node_list = self.slice_items()
-            self.eat(RCONTAINER)
-            node = Index(node, node_list)
+        while (post_tok.type == OPERATOR and post_tok.val in post_unary_ops) or \
+              (post_tok.type == LCONTAINER and post_tok.val == LINDEX):
+
+            if post_tok.type == OPERATOR and post_tok.val in post_unary_ops:
+                self.eat(OPERATOR)
+                node = PostUnaryOp(post_tok, node)
+            elif post_tok.type == LCONTAINER and post_tok.val == LINDEX:
+                self.eat(LCONTAINER)
+                node_list = self.slice_items()
+                self.eat(RCONTAINER)
+                node = Index(node, node_list)
+
+            post_tok = self.token
 
         return node
 
@@ -765,6 +786,11 @@ class Tester(NodeVisitor):
     def visit_BinOp(self, node):
         self.visit(node.left)
         self.visit(node.right)
+
+    def visit_Ternary(self, node):
+        self.visit(node.condition)
+        self.visit(node.true_val)
+        self.visit(node.false_val)
 
     def visit_Conditional(self, node):
         for condition in node.conditions:
@@ -976,19 +1002,31 @@ class Interpreter(NodeVisitor):
     def visit_Index(self, node):
         base = self.visit(node.base_node)
 
-        if len(node.options) == 1:
-            return base[self.visit(node.options[0])]
-        elif len(node.options) == 2:
-            return base[slice(self.visit(node.options[0]) if node.options[0] else None, None, None)]
-        elif 3 <= len(node.options) <= 4:
-            return base[slice(self.visit(node.options[0]) if node.options[0] else None,
-                              self.visit(node.options[2]) if node.options[2] else None, None)]
-        elif len(node.options) == 5:
-            return base[slice(self.visit(node.options[0]) if node.options[0] else None,
-                              self.visit(node.options[2]) if node.options[2] else None,
-                              self.visit(node.options[4]) if node.options[4] else None)]
+        try:
+            base[0]
+            base_type = None
+        except TypeError:
+            base_type = type(base)
+            base = str(base)
 
-        raise CQSyntaxError("Error indexing - attempted to index with options length " + str(len(node.options)))
+        if len(node.options) == 1:
+            out = base[self.visit(node.options[0])]
+        elif len(node.options) == 2:
+            out = base[slice(self.visit(node.options[0]) if node.options[0] else None, None, None)]
+        elif 3 <= len(node.options) <= 4:
+            out = base[slice(self.visit(node.options[0]) if node.options[0] else None,
+                             self.visit(node.options[2]) if node.options[2] else None, None)]
+        elif len(node.options) == 5:
+            out = base[slice(self.visit(node.options[0]) if node.options[0] else None,
+                             self.visit(node.options[2]) if node.options[2] else None,
+                             self.visit(node.options[4]) if node.options[4] else None)]
+        else:
+            raise CQSyntaxError("Error indexing - attempted to index with options length " + str(len(node.options)))
+
+        if base_type:
+            out = base_type(out)
+
+        return out
 
     def visit_BinOp(self, node):
         left = self.visit(node.left)
@@ -1000,6 +1038,14 @@ class Interpreter(NodeVisitor):
             # if right side is list, perform op on all in list
             except (TypeError, CQTypeError):
                 return [binary_ops[node.op.val](left, item) for item in right]
+
+    def visit_Ternary(self, node):
+        condition = self.visit(node.condition)
+
+        if condition:
+            return self.visit(node.true_val)
+        else:
+            return self.visit(node.false_val)
 
     def visit_Constant(self, node):
         if is_constant(node.name):

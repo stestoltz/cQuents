@@ -118,6 +118,16 @@ class BinOp(AST):
         return "<BinOp: " + str(self.left) + " " + str(self.op) + " " + str(self.right) + ">"
 
 
+class Ternary(AST):
+    def __init__(self, condition, true_val, false_val):
+        self.condition = condition
+        self.true_val = true_val
+        self.false_val = false_val
+
+    def __str__(self):
+        return "<Ternary: " + str(self.condition) + " ? " + str(self.true_val) + " : " + str(self.false_val) + ">"
+
+
 class Constant(AST):
     def __init__(self, name):
         self.name = name

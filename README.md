@@ -116,6 +116,7 @@ For simplicity, in the descriptions, the expression to the left of the operator 
 | Binary | And | `&` | Python: `x and y`
 | Binary | Or | `\|` | Python: `x or y`
 | Binary | In | `i` | Python: `x in y`
+| Ternary | If-Else | `?:` | Like Java ternary - `<condition>?<value if true>:<value if false>`
 
 \* note that trailing `)`s right before the end of your code can all be left off
 
@@ -146,6 +147,9 @@ The character `_` signifies an two-byte operation.
 
 | First |
 | ----- |
+| `?:` |
+| Post-Unary Ops, `[]` |
+| Unary Ops |
 | `^`, `e` |
 | `*`, `/`, `_/`, `%` |
 | `-`, `+`, `~` |
