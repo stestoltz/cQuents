@@ -684,7 +684,6 @@ class NodeVisitor:
     def generic_visit(self, node):
         raise CQInternalError("No visit_" + type(node).__name__ + " method")
 
-
 class Tester(NodeVisitor):
     def __init__(self):
         self.max_input = -1
@@ -807,6 +806,9 @@ class Interpreter(NodeVisitor):
         else:
             sum_ = 0
 
+            # if node.mode == SEQUENCE_2 and not do_prints:
+            finite_sequence = FiniteSequence([])
+
             for val in self.sequence:
 
                 if node.mode == SEQUENCE_1:
@@ -830,11 +832,16 @@ class Interpreter(NodeVisitor):
 
                 elif node.mode == SEQUENCE_2:
                     if query_n:
-                        if n == self.current:
-                            print(val, end="", flush=node.is_stringed)
-                            break
+                        if do_prints:
+                            if n == self.current:
+                                print(val, end="", flush=node.is_stringed)
+                                break
+                            else:
+                                print(val, end=self.join, flush=node.is_stringed)
                         else:
-                            print(val, end=self.join, flush=node.is_stringed)
+                            finite_sequence.terms.append(val)
+                            if n == self.current:
+                                return finite_sequence
 
                 elif node.mode == SERIES:
                     try:

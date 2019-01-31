@@ -80,6 +80,18 @@ class FiniteSequence(AST):
     def __init__(self, terms):
         self.terms = terms
 
+    def __iter__(self):
+        self.index = 0
+        return self
+
+    def __next__(self):
+        try:
+            cur = self.terms[self.index]
+        except IndexError:
+            raise StopIteration
+        self.index += 1
+        return cur
+
     def __str__(self):
         return "<FiniteSequence: " + str([str(node) for node in self.terms]) + ">"
 
