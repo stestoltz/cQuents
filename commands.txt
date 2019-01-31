@@ -189,7 +189,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  B   | second input
  C   | third input
  D   | digits
- E   | # apply function to finite sequence
+ E   | applier: apply function to list
  F   | floor
  G   | # GCD
  H   |

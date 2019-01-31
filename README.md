@@ -205,6 +205,8 @@ For simplicity, in the descriptions, the individual parameters given to the func
 | Smallest | `\w` | 1 | Returns the `a`th smallest positive integer not yet in the sequence
 | Proper Divisors | `\z` | 1 | Returns the proper divisors of `a`
 
+Note: you can use `E` in front of a builtin to apply a builtin to every parameter. For example, `EL1;11;111)` will give `1,2,3`.
+
 **OEIS**
 
 Currently, there are plans for cQuents to have a dictionary of some OEIS sequences (stored as cQuents generator programs) which can be called as builtin functions. For those sequences currently implemented (see `oeis.py` for a full list), the sequence can be called with the function `O#A`, where `#` is the sequence index with all leading zeroes removed, and `A` is the alphabetic letter preceding the sequence (as of 7/24/2017 all OEIS sequences use `A`, but once the numeric index resets, the assumption is that it will start at `B`). Pass this function the (usually 1-based) index you want in the sequence - see its line in `oeis.py` for details on exactly how it is implemented in cQuents.

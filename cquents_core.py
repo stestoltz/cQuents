@@ -77,26 +77,26 @@ class Program(AST):
 
 
 class FiniteSequence(AST):
-    def __init__(self, terms):
-        self.terms = terms
+    def __init__(self, parameters):
+        self.parameters = parameters
 
     def __iter__(self):
         self.index = 0
         return self
 
     def __getitem__(self, key):
-        return self.terms[key]
+        return self.parameters[key]
 
     def __next__(self):
         try:
-            cur = self.terms[self.index]
+            cur = self.parameters[self.index]
         except IndexError:
             raise StopIteration
         self.index += 1
         return cur
 
     def __str__(self):
-        return "<FiniteSequence: " + str(str(node) for node in self.terms) + ">"
+        return "<FiniteSequence: " + ",".join(str(node) for node in self.parameters) + ">"
 
 
 class BinOp(AST):
@@ -124,6 +124,23 @@ class Builtin(AST):
 
     def __str__(self):
         return "<Builtin: " + self.builtin + " " + ",".join(str(x) for x in self.parameters) + ">"
+
+
+class Applier(AST):
+    def __init__(self, builtin, parameters):
+        self.builtin = builtin
+        self.parameters = parameters
+
+    def __str__(self):
+        return "<Applier: " + self.builtin + " " + ",".join(str(x) for x in self.parameters) + ">"
+
+
+class Applied(AST):
+    def __init__(self, term):
+        self.parameters = (term,)
+
+    def __str__(self):
+        return "<Applied: " + self.parameters[0] + ">"
 
 
 class Conditional(AST):

@@ -53,6 +53,8 @@ rcontainers = (RPAREN, RSEQUENCE, RINDEX)
 IFTRUE = "#"
 conditionals = (IFTRUE,)
 
+APPLIER = "E"
+
 DECIMAL_POINT = "."
 
 LITERAL_ESCAPE = "@"
@@ -403,19 +405,25 @@ class Lexer:
         elif self.cur == EXTRA_OPS and self.cur + self.peek() in extra_operators:
             return Token(OPERATOR, self.advance() + self.advance())
 
+        elif self.cur == APPLIER:
+            return Token(APPLIER, self.advance())
+
         if self.cur == LITERAL_ESCAPE:
             self.advance()
             return Token(LITERAL, self.advance())
+
         elif self.cur == LITERAL_QUOTE_1 or self.cur == LITERAL_QUOTE_2:
             quote = self.cur
             self.advance()
             temp = self.read_literal(quote)
             self.advance()
             return temp
+
         elif self.cur == NEWLINE_CHAR:
             self.advance()
             self.reset()
             return Token(NEWLINE, NEWLINE_CHAR)
+
         else:
             if self.cur is not None:
                 return Token(LITERAL, self.advance())
@@ -659,6 +667,13 @@ class Parser:
             node_list = self.function_items()
             self.eat(RCONTAINER)
             node = Builtin(builtin, node_list)
+        elif tok.type == APPLIER:
+            self.eat(APPLIER)
+            builtin = self.token.val
+            self.eat(BUILTIN)
+            node_list = self.function_items()
+            self.eat(RCONTAINER)
+            node = Applier(builtin, node_list)
         elif tok.type == CONDITIONAL:
             conditional = tok.val
             self.eat(CONDITIONAL)
@@ -703,7 +718,7 @@ class Tester(NodeVisitor):
             self.visit(each)
 
     def visit_FiniteSequence(self, node):
-        for term in node.terms:
+        for term in node.parameters:
             self.visit(term)
 
     def visit_BinOp(self, node):
@@ -717,6 +732,13 @@ class Tester(NodeVisitor):
     def visit_Builtin(self, node):
         for parameter in node.parameters:
             self.visit(parameter)
+
+    def visit_Applier(self, node):
+        for parameter in node.parameters:
+            self.visit(parameter)
+
+    def visit_Applied(self, node):
+        self.visit(node.parameters[0])
 
     def visit_UnaryOp(self, node):
         self.visit(node.expr)
@@ -905,7 +927,7 @@ class Interpreter(NodeVisitor):
 
     def visit_FiniteSequence(self, node):
         terms = []
-        for term in node.terms:
+        for term in node.parameters:
             terms.append(self.visit(term))
 
         return terms
@@ -915,7 +937,11 @@ class Interpreter(NodeVisitor):
         right = self.visit(node.right)
 
         if is_binary_operator(node.op.val):
-            return binary_ops[node.op.val](left, right)
+            try:
+                return binary_ops[node.op.val](left, right)
+            # if right side is list, perform op on all in list
+            except (TypeError, CQTypeError):
+                return [binary_ops[node.op.val](left, item) for item in right]
 
     def visit_Constant(self, node):
         if is_constant(node.name):
@@ -924,6 +950,20 @@ class Interpreter(NodeVisitor):
     def visit_Builtin(self, node):
         if is_builtin(node.builtin):
             return builtins[node.builtin](self, node)
+
+    def visit_Applier(self, node):
+        applied = []
+
+        for parameter in node.parameters:
+            try:
+                applied.append(builtins[node.builtin](self, Applied(parameter)))
+            except IndexError:
+                applied.append(builtins[node.builtin](self, parameter))
+
+        return applied
+
+    def visit_Applied(self, node):
+        return self.visit(node.parameters[0])
 
     def visit_Conditional(self, node):
         self.current_conditional = node
@@ -943,11 +983,17 @@ class Interpreter(NodeVisitor):
 
     def visit_UnaryOp(self, node):
         if is_unary_operator(node.op.val):
-            return unary_ops[node.op.val](self.visit(node.expr))
+            try:
+                return unary_ops[node.op.val](self.visit(node.expr))
+            except (TypeError, CQTypeError):
+                return [unary_ops[node.op.val](self.visit(item)) for item in node.expr]
 
     def visit_PostUnaryOp(self, node):
         if node.op.val in post_unary_ops:
-            return post_unary_ops[node.op.val](self.visit(node.expr))
+            try:
+                return post_unary_ops[node.op.val](self.visit(node.expr))
+            except (TypeError, CQTypeError):
+                return [post_unary_ops[node.op.val](self.visit(item)) for item in node.expr]
 
     def visit_Var(self, node):
         if node.name == CURRENT:
