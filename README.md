@@ -77,6 +77,7 @@ The character `` ` `` signifies that the next char will be a constant identifier
 | 1/2 | `` `2`` | `1/2` | 1/2
 | 1/3 | `` `3`` | `1/3` | 1/3
 | 1/4 | `` `4`` | `1/4` | 1/4
+| 1/10 | `` `0`` | `1/10` | 1/10
 | Catalan's constant | `` `c`` | `0.915965594177219` | Sum of 1 - 1/9 + 1/25 - 1/49 + ...
 | e | `` `e`` | `2.718281828459045` | Currently equals Python's `math.e`
 | Golden Ratio | `` `g`` | `1.618033988749895` | `.5 * (math.sqrt(5) + 1)`
@@ -153,21 +154,29 @@ For simplicity, in the descriptions, the individual parameters given to the func
 | Second Line | `b` | 1 to many | Returns the second line given the parameters as input
 | Third Line | `c` | 1 to many | Returns the third line given the parameters as input
 | Line Function | `d` | 2 to many | Returns the line at `a` given the rest of the parameters
+| Digits | `D` | 1 | Returns the digit list of `a`
 | Factorial | `f` | 1 | Returns the factorial (`!`) of `a`
 | Floor | `F` | 1 | Returns the floor of `a`
 | Char | `h` | 1 | Returns Python's `chr` of `a`
 | Input Function | `I` | 1 | Returns the input at the position of `a`
 | Logarithm | `l` | 1 or 2 | If `b` exists, returns the natural logarithm (base `e` logarithm) of `a`. Otherwise, returns the base `b` logarithm of `a`
 | Length | `L` | 1 or 2 | Returns the length of `a`, including the decimal point if `b` exists
+| Min | `m` | 1 | Returns the minimum of `a`
+| Max | `M` | 1 | Returns the maximum of `b`
 | OEIS | `O<index><letter>` | 1? | Returns the item in the index of `a` in the OEIS sequence `<letter><possible leading zeroes><index>`, if implemented (see `oeis.py`)
 | Ordinal | `o` | 1 | Returns Python's `ord` of `a`
 | Next Prime | `p` | 1 | Returns the next prime **after** `a`
 | Previous Function | `P` | 1 | Returns the previous term back as many terms as `a`
+| Deduplicate | `Q` | 1 | Removes duplicates from `a`, retaining order
 | Root | `r` | 1 or 2 | If `b` does not exist, returns the square root of `a`. Otherwise, returns `a` to the power of the reciprocal of `b`
 | Round | `R` | 1 | Returns `a`, rounded
+| Sort | `s` | 1 | Returns `a`, sorted
 | String | `S` | 1 | Returns `a` converted to a string
 | Ceiling | `T` | 1 | Returns the ceil of `a`
+| Count | `u` | 2 | Returns the count of `b` in `a`
+| Sum | `U` | 1 | Returns the sum of `a`
 | Absolute Value | `v` | 1 | Returns the absolute value of `a`
+| Average | `V` | 1 | Returns the average value of `a`
 | Exp | `x` | 1 | Returns e to the power of `a`
 | Cosine | `\c` | 1 | Returns the cos of `a`
 | Logarithm 2 | `\l` | 1 | Returns the base `10` logarithm of `a`

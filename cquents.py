@@ -67,10 +67,14 @@ FUNCTION_SEPARATOR = ";"
 separators = [TERM_SEPARATOR, META_SEPARATOR, FUNCTION_SEPARATOR]
 
 LPAREN = "("
-lcontainers = [LPAREN]
+LSEQUENCE = "{"
+LINDEX = "["
+lcontainers = [LPAREN, LSEQUENCE, LINDEX]
 
 RPAREN = ")"
-rcontainers = [RPAREN]
+RSEQUENCE = "}"
+RINDEX = "]"
+rcontainers = [RPAREN, RSEQUENCE, RINDEX]
 
 DECIMAL_POINT = "."
 
@@ -103,6 +107,7 @@ constants = {
     CONSTANTS + "2": 1/2,
     CONSTANTS + "3": 1/3,
     CONSTANTS + "4": 1/4,
+    CONSTANTS + "0": 1/10,
     CONSTANTS + "c": 0.915965594177219,
     CONSTANTS + "e": math.e,
     CONSTANTS + "g": .5 * (math.sqrt(5) + 1),
@@ -127,20 +132,28 @@ builtins = {
     "b": lambda inter, node: get_line(inter, node.parameters, 1),
     "c": lambda inter, node: get_line(inter, node.parameters, 2),
     "d": lambda inter, node: get_line(inter, node.parameters[1:], int(inter.visit(node.parameters[0]))),
+    "D": lambda inter, node: builtin_helper.digits(inter.visit(node.parameters[0])),
     "f": lambda inter, node: math.factorial(inter.visit(node.parameters[0])),
     "F": lambda inter, node: math.floor(inter.visit(node.parameters[0])),
     "h": lambda inter, node: chr(inter.visit(node.parameters[0])),
     "I": lambda inter, node: inter.get_input(inter.visit(node.parameters[0])),
     "l": lambda inter, node: builtin_helper.log(inter, node.parameters),
     "L": lambda inter, node: builtin_helper.length(inter, node.parameters),
+    "m": lambda inter, node: builtin_helper.min_(inter.visit(node.parameters[0])),
+    "M": lambda inter, node: builtin_helper.max_(inter.visit(node.parameters[0])),
     "o": lambda inter, node: ord(inter.visit(node.parameters[0])),
     "p": lambda inter, node: builtin_helper.next_prime(inter.visit(node.parameters[0])),
     "P": lambda inter, node: inter.get_previous(inter.visit(node.parameters[0])),
+    "Q": lambda inter, node: builtin_helper.deduplicate(inter.visit(node.parameters[0])),
     "r": lambda inter, node: builtin_helper.root(inter, node.parameters),
     "R": lambda inter, node: round(inter.visit(node.parameters[0])),
+    "s": lambda inter, node: builtin_helper.sort(inter, node.parameters),
     "S": lambda inter, node: str(inter.visit(node.parameters[0])),
     "T": lambda inter, node: math.ceil(inter.visit(node.parameters[0])),
+    "u": lambda inter, node: builtin_helper.count_(inter, node.parameters),
+    "U": lambda inter, node: builtin_helper.sum_(inter.visit(node.parameters[0])),
     "v": lambda inter, node: abs(inter.visit(node.parameters[0])),
+    "V": lambda inter, node: builtin_helper.average(inter.visit(node.parameters[0])),
     "x": lambda inter, node: math.exp(inter.visit(node.parameters[0]))
 }
 
@@ -632,12 +645,17 @@ class Parser:
             node = Constant(tok.val)
         elif tok.type == LCONTAINER:
             self.eat(LCONTAINER)
-            node = self.expr()
+
+            if tok.val == LSEQUENCE:
+                node = FiniteSequence(self.function_items())
+            else:
+                node = self.expr()
+
             self.eat(RCONTAINER)
         elif tok.type == BUILTIN:
             builtin = tok.val
             self.eat(BUILTIN)
-            node_list = self.items()
+            node_list = self.function_items()
             self.eat(RCONTAINER)
             node = Builtin(builtin, node_list)
         elif tok.type == ID:
@@ -677,6 +695,10 @@ class Tester(NodeVisitor):
     def visit_Program(self, node):
         for each in node.current_start + node.start + node.input_front + node.input_back + node.statements:
             self.visit(each)
+
+    def visit_FiniteSequence(self, node):
+        for term in node.terms:
+            self.visit(term)
 
     def visit_BinOp(self, node):
         self.visit(node.left)
@@ -855,6 +877,13 @@ class Interpreter(NodeVisitor):
 
         if do_prints:
             print(node.literals[2], end="", flush=node.is_stringed)
+
+    def visit_FiniteSequence(self, node):
+        terms = []
+        for term in node.terms:
+            terms.append(self.visit(term))
+
+        return terms
 
     def visit_BinOp(self, node):
         left = self.visit(node.left)

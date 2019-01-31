@@ -76,6 +76,14 @@ class Program(AST):
         return "<Program: " + ",".join([str(x) for x in self.statements]) + ">"
 
 
+class FiniteSequence(AST):
+    def __init__(self, terms):
+        self.terms = terms
+
+    def __str__(self):
+        return "<FiniteSequence: " + str([str(node) for node in self.terms]) + ">"
+
+
 class BinOp(AST):
     def __init__(self, left, op, right):
         self.left = left

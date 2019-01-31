@@ -1,6 +1,7 @@
 from cquents_core import *
 import math
 import itertools
+import statistics
 
 # http://www.macdevcenter.com/pub/a/python/excerpt/pythonckbk_chap1/index1.html?page=2
 def gen_primes():
@@ -63,6 +64,8 @@ def concat(x, y):
     if type(x) is type(y) is int and y > 0:
         return int(res)
 
+    # TODO: one str one other, return str
+
     # both are strs: return str
     elif type(x) is type(y) is str:
         return res
@@ -75,10 +78,11 @@ def concat(x, y):
 
 
 def length(origin_interpreter, parameters):
-    if isinstance(parameters[0], Literal):
-        return len(origin_interpreter.visit(parameters[0]))
-    elif isinstance(parameters[0], Number):
-        str_ = str(origin_interpreter.visit(parameters[0]))
+    given = origin_interpreter.visit(parameters[0])
+    try:
+        return len(given)
+    except TypeError:
+        str_ = str(given)
 
         str_ = str_.replace("-", "")
         if len(parameters) == 1:
@@ -86,7 +90,7 @@ def length(origin_interpreter, parameters):
 
         return len(str_)
 
-    raise CQTypeError("Error getting the length of a " + str(type(parameters[0])))
+    # raise CQTypeError("Error getting the length of a " + str(type(parameters[0])))
 
 
 def fill(origin_interpreter, parameters):
@@ -95,10 +99,11 @@ def fill(origin_interpreter, parameters):
 
 
 def reverse(origin_interpreter, parameters):
-    if isinstance(parameters[0], Literal):
-        return origin_interpreter.visit(parameters[0])[::-1]
-    elif isinstance(parameters[0], Number):
-        num = origin_interpreter.visit(parameters[0])
+    given = origin_interpreter.visit(parameters[0])
+    try:
+        return given[::-1]
+    except TypeError:
+        num = given
         is_negative = num < 0
         type_ = type(num)
         keep_dot_position = len(parameters) == 1
@@ -125,36 +130,108 @@ def reverse(origin_interpreter, parameters):
 
         return -res if is_negative else res
 
-    raise CQTypeError("Error reversing a " + str(type(parameters[0])))
+    # raise CQTypeError("Error reversing a " + str(type(parameters[0])))
+
 
 def rotate(origin_interpreter, parameters):
     return primitive_rotate(origin_interpreter.visit(parameters[0]), origin_interpreter.visit(parameters[1]), len(parameters) <= 2)
 
 
-#https://stackoverflow.com/a/8458282/7605753
-def primitive_rotate(num, rotation, keep_dot_position=True):
-    is_negative = num < 0
-    type_ = type(num)
+# https://stackoverflow.com/a/8458282/7605753
+def primitive_rotate(given, rotation, keep_dot_position=True):
+    try:
+        rotation = rotation % len(given)
+        return given[-rotation:] + given[:-rotation]
+    except TypeError:
+        num = given
+        is_negative = num < 0
+        type_ = type(num)
 
-    if type_ == int:
-        str_ = str(int(math.fabs(num)))
-    else:
-        str_ = str(math.fabs(num))
+        if type_ == int:
+            str_ = str(int(math.fabs(num)))
+        else:
+            str_ = str(math.fabs(num))
 
-    dot_index = str_.find(".")
+        dot_index = str_.find(".")
 
-    if ~dot_index and keep_dot_position:
-        str_ = str_.replace(".", "")
+        if ~dot_index and keep_dot_position:
+            str_ = str_.replace(".", "")
 
-    rotation = rotation % len(str_)
-    str_ = str_[-rotation:] + str_[:-rotation]
+        rotation = rotation % len(str_)
+        str_ = str_[-rotation:] + str_[:-rotation]
 
-    if ~dot_index:
-        if keep_dot_position:
-            str_ = str_[:dot_index] + "." + str_[dot_index:]
+        if ~dot_index:
+            if keep_dot_position:
+                str_ = str_[:dot_index] + "." + str_[dot_index:]
 
-        res = float(str_)
-    else:
-        res = int(str_)
+            res = float(str_)
+        else:
+            res = int(str_)
 
-    return -res if is_negative else res
+        return -res if is_negative else res
+
+
+def digits(given):
+    try:
+        return [x for x in given]
+    except TypeError:
+        return [int(x) for x in str(given).replace(".", "")]
+
+
+def average(given):
+    try:
+        return statistics.mean(given)
+    except TypeError:
+        return statistics.mean(digits(given))
+
+
+def count_(origin_interpreter, parameters):
+    lst = origin_interpreter.visit(parameters[0])
+    key = origin_interpreter.visit(parameters[1])
+
+    try:
+        return lst.count(key)
+    except AttributeError:
+        return digits(lst).count(key)
+
+
+def min_(lst):
+    try:
+        return min(lst)
+    except TypeError:
+        return min(digits(lst))
+
+
+def max_(lst):
+    try:
+        return max(lst)
+    except TypeError:
+        return max(digits(lst))
+
+
+def sum_(lst):
+    try:
+        return sum(lst)
+    except TypeError:
+        return sum(digits(lst))
+
+
+def sort(origin_interpreter, parameters):
+    lst = origin_interpreter.visit(parameters[0])
+    order = len(parameters) > 1
+
+    try:
+        return sorted(lst, reverse=order)
+    except TypeError:
+        return int("".join(str(x) for x in sorted(digits(lst), reverse=order)))
+
+
+def deduplicate(given):
+    if type(given) is list:
+        return list(dict.fromkeys(given))
+    elif type(given) is str:
+        return "".join(list(dict.fromkeys(given)))
+    elif type(given) is int:
+        return int("".join(list(dict.fromkeys(str(given)))))
+    elif type(given) is float:
+        return float("".join(list(dict.fromkeys(str(given)))))

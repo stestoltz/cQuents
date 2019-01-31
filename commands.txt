@@ -87,23 +87,31 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  _>  | Bitwise right shift: x_>y
 
 -----| Functions
- a   | Line 1:           a[...])
- b   | Line 2:           b[...])
- c   | Line 3:           c[...])
- d   | Lines:            dx,[...])
+ a   | Line 1:           a...)
+ b   | Line 2:           b...)
+ c   | Line 3:           c...)
+ d   | Lines:            dx,...)
+ D   | Digits            Dx)
  f   | Factorial:        fx)
  F   | Floor:            Fx)
  I   | Input:            Ix)
  l   | Logarithm:        lx[,y]) (default y: _e)
  L   | Length:           Lx[,y]) (if y exists, include "." in count)
+ m   | Min:              m{...})
+ M   | Max:              M{...})
  O   | OEIS:             O<seqNum><seqLetter>x)
  p   | Next Prime (exclusive): px)
  P   | Previous:         Px)
+ Q   | Deduplicate       Qx)
  r   | Root:             rx[,y]) (default y: 2)
  R   | Round:            Rx)
+ s   | Sort:             s{...}[,x]) (if x exists, reverse the order)
  S   | String:           Sx)
  T   | Ceil:             Tx)
+ u   | Count:            u{...},x)
+ U   | Sum:              Ux)
  v   | Absolute value:   vx)
+ V   | Average:          V{...})
  x   | Exp:              Xx)
  \c  | Cosine:           \cx)
  \l  | Log 10:           \lx)
@@ -116,6 +124,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  `2  | 1/2
  `3  | 1/3
  `4  | 1/4
+ `0  | 1/10
  `c  | Catalan's constant: Sum of 1/1^2 - 1/3^2 + 1/5^2 - 1/7^2 + ...
  `e  | e: Base of the natural logarithm
  `g  | Golden Ratio: .5 * (sqrt(5) + 1)
@@ -164,25 +173,25 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  A   | first input
  B   | second input
  C   | third input
- D   |
+ D   | digits
  E   |
  F   | floor
- G   | #GCD
+ G   | # GCD
  H   |
  I   | input func
  J   |
  K   |
  L   | length
- M   | #LCM
+ M   | max
  N   |
  O   |
  P   | previous func
- Q   |
+ Q   | deduplicate
  R   | round
  S   | convert to string
  T   | ceiling
- U   |
- V   |
+ U   | sum
+ V   | average
  W   |
  X   | third previous term
  Y   | second previous term
@@ -199,21 +208,21 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  d   | lines func
  e   | scientific notation
  f   | factorial
- g   |
+ g   | # LCM
  h   | char
  i   |
  j   |
  k   | like $, but if there are multiple terms, it only increments when the terms reset
  l   | logarithm (default base e)
- m   |
+ m   | min
  n   | input n
  o   | ordinal
  p   | next prime
  q   |
  r   | root
- s   |
+ s   | sort
  t   | ten
- u   |
+ u   | count
  v   | absolute value
  w   |
  x   | exp
