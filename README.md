@@ -16,6 +16,7 @@ To try cQuents, [click here for an online interpreter](https://tio.run/#cquents)
       - [Constants](https://github.com/stestoltz/cQuents#constants)
       - [Operations](https://github.com/stestoltz/cQuents#operations)
       - [Builtins](https://github.com/stestoltz/cQuents#builtins)
+      - [Conditionals](https://github.com/stestoltz/cQuents#conditionals)
     - [Parameters](https://github.com/stestoltz/cQuents#parameters)
       - [Literals](https://github.com/stestoltz/cQuents#literals)
       - [Default Input](https://github.com/stestoltz/cQuents#default-input)
@@ -97,6 +98,7 @@ For simplicity, in the descriptions, the expression to the left of the operator 
 | Unary | Positive | `+` | Positive of `y` (only occurs when there is no `x`, can be used to convert non-numbers to numbers)
 | Unary | Bitwise Not | `~` | The negative of (`y` plus one) (only occurs when there is no `x`)
 | Unary | Reciprocal | `/` | One divided by `y` (only occurs when there is no `x`)
+| Unary | Logical Not | `!` | Logical negation of `x`
 | Post-Unary | Factorial | `!` | The factorial of `x`
 | Binary | Addition | `+` | Adds `x` to `y`
 | Binary | Subtraction | `-` | Subtracts `y` from `x`
@@ -204,6 +206,10 @@ For simplicity, in the descriptions, the individual parameters given to the func
 **OEIS**
 
 Currently, there are plans for cQuents to have a dictionary of some OEIS sequences (stored as cQuents generator programs) which can be called as builtin functions. For those sequences currently implemented (see `oeis.py` for a full list), the sequence can be called with the function `O#A`, where `#` is the sequence index with all leading zeroes removed, and `A` is the alphabetic letter preceding the sequence (as of 7/24/2017 all OEIS sequences use `A`, but once the numeric index resets, the assumption is that it will start at `B`). Pass this function the (usually 1-based) index you want in the sequence - see its line in `oeis.py` for details on exactly how it is implemented in cQuents.
+
+#### Conditionals
+
+Conditionals are started with `#` and ended with `)`. Conditionals use the variable `N`, which is the number it is checking. They return `N` when all `;` separated terms in the conditional are true.
 
 ## Parameters
 

@@ -73,7 +73,7 @@ class Program(AST):
         self.is_stringed = parameters.is_stringed
 
     def __str__(self):
-        return "<Program: " + ",".join([str(x) for x in self.statements]) + ">"
+        return "<Program: " + ",".join(str(x) for x in self.statements) + ">"
 
 
 class FiniteSequence(AST):
@@ -96,7 +96,7 @@ class FiniteSequence(AST):
         return cur
 
     def __str__(self):
-        return "<FiniteSequence: " + str([str(node) for node in self.terms]) + ">"
+        return "<FiniteSequence: " + str(str(node) for node in self.terms) + ">"
 
 
 class BinOp(AST):
@@ -106,7 +106,7 @@ class BinOp(AST):
         self.right = right
 
     def __str__(self):
-        return "<BinOp: " + str(self.op) + " " + str(self.left) + " " + str(self.right) + ">"
+        return "<BinOp: " + str(self.left) + " " + str(self.op) + " " + str(self.right) + ">"
 
 
 class Constant(AST):
@@ -123,7 +123,17 @@ class Builtin(AST):
         self.parameters = parameters
 
     def __str__(self):
-        return "<Builtin: " + self.builtin + " " + ",".join([str(x) for x in self.parameters]) + ">"
+        return "<Builtin: " + self.builtin + " " + ",".join(str(x) for x in self.parameters) + ">"
+
+
+class Conditional(AST):
+    def __init__(self, conditional, conditions):
+        self.conditional = conditional
+        self.conditions = conditions
+        self.n = 1
+
+    def __str__(self):
+        return "<Conditional: " + self.conditional + " " + ",".join(str(x) for x in self.conditions) + ">"
 
 
 class UnaryOp(AST):

@@ -6,23 +6,6 @@ import sys
 
 import oeis
 
-#codepage  = """μηΔ↑≺≻🙸         """
-#codepage += """½⅓¼⅒⅟√∛∜∨∧«¬»⨽₊₋"""
-#codepage += """ !"#$%&'()*+,-./"""
-#codepage += """0123456789:;<=>?"""
-#codepage += """@ABCDEFGHIJKLMNO"""
-#codepage += """PQRSTUVWXYZ[\\]^_"""
-#codepage += """`abcdefghijklmno"""
-#codepage += """pqrstuvwxyz{|}~\n"""
-#codepage += """⁰¹²³⁴⁵⁶⁷⁸⁹⁻⟨¿⟩÷×"""
-#codepage += """₀₁₂₃₄₅₆₇₈₉𝕏ℂ𝕄⦗·⦘"""
-#codepage += """∑∏∈∉σφωΩ≤≠≥ẠḄḌẸḤ"""
-#codepage += """ỊḲḶṂṆỌṚṢṬỤṾẈỴẒȦḂ"""
-#codepage += """ĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆ"""
-#codepage += """ẊẎŻạḅḍẹḥịḳḷṃṇọṛṣ"""
-#codepage += """ṭụṿẉỵẓȧḃċḋėḟġḣŀṁ"""
-#codepage += """ṅȯṗṙṡṫẇẋẏż…⋯⋮∫Ξ𝔼"""
-
 LITERAL = "LITERAL"
 NUMBER = "NUMBER"
 EOF = "EOF"
@@ -36,16 +19,7 @@ SEPARATOR = "SEPARATOR"
 NEWLINE = "NEWLINE"
 LCONTAINER = "LCONTAINER"
 RCONTAINER = "RCONTAINER"
-
-# modes = []
-# params = []
-# separators = []
-# operators = []
-# extra_operators = []
-# builtins = []
-# extra_builtins = []
-# lcontainers = []
-# rcontainers = []
+CONDITIONAL = "CONDITIONAL"
 
 SEQUENCE_1 = ":"
 SEQUENCE_2 = "::"
@@ -53,28 +27,31 @@ SERIES = ";"
 CLOSEST = ";;"
 QUERY = "?"
 NOT_QUERY = "??"
-modes = [SEQUENCE_1, SEQUENCE_2, SERIES, CLOSEST, QUERY, NOT_QUERY]
+modes = (SEQUENCE_1, SEQUENCE_2, SERIES, CLOSEST, QUERY, NOT_QUERY)
 
 START_INDEX = "$"
 START_TERMS = "="
 DEFAULT_INPUT = "#"
 STRINGED = '"'
-params = [START_INDEX, START_TERMS, DEFAULT_INPUT, STRINGED]
+params = (START_INDEX, START_TERMS, DEFAULT_INPUT, STRINGED)
 
 TERM_SEPARATOR = ","
 META_SEPARATOR = "|"
 FUNCTION_SEPARATOR = ";"
-separators = [TERM_SEPARATOR, META_SEPARATOR, FUNCTION_SEPARATOR]
+separators = (TERM_SEPARATOR, META_SEPARATOR, FUNCTION_SEPARATOR)
 
 LPAREN = "("
 LSEQUENCE = "{"
 LINDEX = "["
-lcontainers = [LPAREN, LSEQUENCE, LINDEX]
+lcontainers = (LPAREN, LSEQUENCE, LINDEX)
 
 RPAREN = ")"
 RSEQUENCE = "}"
 RINDEX = "]"
-rcontainers = [RPAREN, RSEQUENCE, RINDEX]
+rcontainers = (RPAREN, RSEQUENCE, RINDEX)
+
+IFTRUE = "#"
+conditionals = (IFTRUE,)
 
 DECIMAL_POINT = "."
 
@@ -90,12 +67,13 @@ NEWLINE_CHAR = "\n"
 """ VARIABLES"""
 
 N = "n"
+CONDITIONAL_N = "N"
 CURRENT = "$"
 K = "k"
 TEN = "t"
 input_ids = ["A", "B", "C"]
 previous_ids = ["Z", "Y", "X"]
-variables = [N, CURRENT, K, TEN] + input_ids + previous_ids
+variables = [N, CONDITIONAL_N, CURRENT, K, TEN] + input_ids + previous_ids
 
 def is_variable(x): return x in variables
 
@@ -189,7 +167,8 @@ unary_ops = {
     "-": lambda x: -x,
     "+": lambda x: +x,
     "~": lambda x: ~x,
-    "/": lambda x: 1/x
+    "/": lambda x: 1/x,
+    "!": lambda x: int(not x)
 }
 post_unary_ops = {
     "!": lambda x: math.factorial(x)
@@ -326,7 +305,7 @@ class Token:
         self.val = val
 
     def can_multiply(self):
-        return self.type in (NUMBER, ID, BUILTIN, LCONTAINER, CONSTANT)
+        return self.type in (NUMBER, ID, BUILTIN, CONDITIONAL, LCONTAINER, CONSTANT)
 
     def __str__(self):
         return "<Token: " + self.type + " " + str(self.val) + ">"
@@ -394,7 +373,7 @@ class Lexer:
         elif self.cur == DECIMAL_POINT or is_one_int.match(self.cur):
             return self.read_number()
 
-        elif self.cur in variables:
+        elif is_variable(self.cur):
             return self.read_id()
 
         elif self.cur == CONSTANTS and self.cur + self.peek() in constants:
@@ -409,6 +388,9 @@ class Lexer:
 
         elif self.cur in builtins:
             return Token(BUILTIN, self.advance())
+
+        elif self.cur in conditionals:
+            return Token(CONDITIONAL, self.advance())
 
         elif self.cur == EXTRA_BUILTINS and self.cur + self.peek() in extra_builtins:
             return Token(BUILTIN, self.advance() + self.advance())
@@ -675,6 +657,12 @@ class Parser:
             node_list = self.function_items()
             self.eat(RCONTAINER)
             node = Builtin(builtin, node_list)
+        elif tok.type == CONDITIONAL:
+            conditional = tok.val
+            self.eat(CONDITIONAL)
+            node_list = self.function_items()
+            self.eat(RCONTAINER)
+            node = Conditional(conditional, node_list)
         elif tok.type == ID:
             node = self.variable()
         elif tok.type == LITERAL:
@@ -720,6 +708,10 @@ class Tester(NodeVisitor):
         self.visit(node.left)
         self.visit(node.right)
 
+    def visit_Conditional(self, node):
+        for condition in node.conditions:
+            self.visit(condition)
+
     def visit_Builtin(self, node):
         for parameter in node.parameters:
             self.visit(parameter)
@@ -750,6 +742,8 @@ class Interpreter(NodeVisitor):
         self.current_inc = 1
         self.program = None
         self.join = TERM_SEPARATOR
+
+        self.current_conditional = None
 
     # 0 is last, 1 is second last, etc.
     def get_previous(self, num):
@@ -824,7 +818,7 @@ class Interpreter(NodeVisitor):
             sum_ = 0
 
             # if node.mode == SEQUENCE_2 and not do_prints:
-            finite_sequence = FiniteSequence([])
+            finite_sequence = []
 
             for val in self.sequence:
 
@@ -856,7 +850,7 @@ class Interpreter(NodeVisitor):
                             else:
                                 print(val, end=self.join, flush=node.is_stringed)
                         else:
-                            finite_sequence.terms.append(val)
+                            finite_sequence.append(val)
                             if n == self.current:
                                 return finite_sequence
 
@@ -881,21 +875,26 @@ class Interpreter(NodeVisitor):
                 elif node.mode in (QUERY, NOT_QUERY):
                     # TODO: integrate with \# functions when `if` is implemented
 
-                    if_in = "true" if node.mode == QUERY else "false"
-                    if_out = "false" if node.mode == QUERY else "true"
+                    res = node.mode == QUERY
 
                     if query_n:
                         if n == val:
-                            print(if_in, end="", flush=node.is_stringed)
-                            break
+                            if do_prints:
+                                print(res, end="", flush=node.is_stringed)
+                                break
+                            else:
+                                return int(res)
                         # elif previous and cur_val < previous:
                         #     print("false", end="", flush=node.is_stringed)
                         #     done = True
 
                         # TODO: FIXME
                         elif val > n:
-                            print(if_out, end="", flush=node.is_stringed)
-                            break
+                            if do_prints:
+                                print(not res, end="", flush=node.is_stringed)
+                                break
+                            else:
+                                return int(not res)
 
                 self.current += self.current_inc
 
@@ -924,6 +923,22 @@ class Interpreter(NodeVisitor):
         if is_builtin(node.builtin):
             return builtins[node.builtin](self, node)
 
+    def visit_Conditional(self, node):
+        self.current_conditional = node
+
+        n = 0
+        if node.conditional == IFTRUE:
+            while True:
+                if all(self.visit(condition) for condition in node.conditions):
+                    n = node.n
+                    node.n += 1
+                    break
+                else:
+                    node.n += 1
+
+        self.current_conditional = None
+        return n
+
     def visit_UnaryOp(self, node):
         if is_unary_operator(node.op.val):
             return unary_ops[node.op.val](self.visit(node.expr))
@@ -939,6 +954,9 @@ class Interpreter(NodeVisitor):
             return self.sequence.k
         elif node.name == N:
             return self.n
+        elif node.name == CONDITIONAL_N:
+            return self.current_conditional.n
+            # TODO: default functionality
         elif node.name == TEN:
             return 10
         elif node.name in previous_ids:
