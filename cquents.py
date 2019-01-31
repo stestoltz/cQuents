@@ -494,7 +494,8 @@ class Parser:
         if self.token.type == type_:
             self.token = self.lexer.read_token()
         else:
-            if type_ == EOF or (type_ == RCONTAINER and self.token.type in (EOF, NEWLINE, TERM_SEPARATOR)):
+            if type_ == EOF or (type_ == RCONTAINER and (self.token.type in (EOF, NEWLINE) or
+                               (self.token.type == SEPARATOR and self.token.val == TERM_SEPARATOR))):
                 return
 
             raise CQSyntaxError("Incorrect token found: looking for " + type_ + ", found " + self.token.type + " " + self.token.val + " at " + str(self.lexer.pos))
