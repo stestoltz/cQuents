@@ -42,7 +42,7 @@ cQuents is designed with sequences in mind. Before you start creating a cQuents 
 | Name | Syntax | Description
 | ---- | ------ | -----------
 | Sequence 1 | `:` | If there is `n`, output the `n`th term; if no `n`, output the whole sequence
-| Sequence 2 | `::` | If there is `n`, output the sequence up to `n`; if no `n`, TODO: converge or diverge
+| Sequence 2 | `&` | If there is `n`, output the sequence up to `n`; if no `n`, TODO: converge or diverge
 | Series | `;` | If there is `n`, output the sum of the sequence (or "series") up to `n`; if no `n`, output the whole series
 | Query | `?` | If there is `n`, output `true` if `n` is in the sequence, and `false` if `n` is not in the sequence; if no `n`, ignore right of mode
 | Reverse Query | `??` | If there is `n`, output `false` if `n` is in the sequence, and `true` if `n` is not in the sequence; if no `n`, ignore right of mode

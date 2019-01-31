@@ -16,7 +16,7 @@
 
 -----| Input
 input = frontinput + userinput + backinput
-Input is expected if the input fetchers (A-E) are used in the program. If there is an extra input afterwards, it is called n. If the input lengths do not match up, an error occurs.
+Input is expected if the input fetchers (A-C) are used in the program. If there is an extra input afterwards, it is called n. If the input lengths do not match up, an error occurs.
 
 -----| Function Format
 <name>[parameter[, parameter]...][)]
@@ -35,7 +35,7 @@ Input is expected if the input fetchers (A-E) are used in the program. If there 
 
 -----| Modes
  :   | Sequence 1: If n, output the nth term. Otherwise, output the whole sequence
- ::  | Sequence 2: If n, output the sequence up to and including the nth term. Otherwise, TODO
+ &   | Sequence 2: If n, output the sequence up to and including the nth term. Otherwise, TODO
  ;   | Series: If n, output the sum of the sequence up to and including n. Otherwise, TODO (output convergent sum of sequence)
  ?   | Query: If there is n, output true if n is in the sequence, and false if n is not in the sequence. (Currently assumes strictly increasing). Otherwise, ignore sequence.
  ??  | Reverse Query: Same as query, but with outputs swapped.
@@ -158,7 +158,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  #   | (param default input) conditional
  $   | current index
  %   | modulus
- &   | logical and
+ &   | (mode sequence 2) logical and
  '   | literal quotes
  (   | Opening parenthesis.
  )   | Closing parenthesis for functions or opening parenthesis. Can be left off of program if before EOF or newline.
