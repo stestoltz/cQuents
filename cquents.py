@@ -137,6 +137,7 @@ builtins = {
     "F": lambda inter, node: math.floor(inter.visit(node.parameters[0])),
     "h": lambda inter, node: chr(inter.visit(node.parameters[0])),
     "I": lambda inter, node: inter.get_input(inter.visit(node.parameters[0])),
+    "j": lambda inter, node: builtin_helper.join_(inter, node.parameters),
     "l": lambda inter, node: builtin_helper.log(inter, node.parameters),
     "L": lambda inter, node: builtin_helper.length(inter, node.parameters),
     "m": lambda inter, node: builtin_helper.min_(inter.visit(node.parameters[0])),

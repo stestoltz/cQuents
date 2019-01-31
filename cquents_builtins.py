@@ -235,3 +235,18 @@ def deduplicate(given):
         return int("".join(list(dict.fromkeys(str(given)))))
     elif type(given) is float:
         return float("".join(list(dict.fromkeys(str(given)))))
+
+
+def join_(origin_interpreter, parameters):
+    lst = origin_interpreter.visit(parameters[0])
+
+    try:
+        glue = origin_interpreter.visit(parameters[1])
+    except IndexError:
+        glue = ""
+
+    joined = glue.join(str(x) for x in lst)
+    try:
+        return int(joined)
+    except ValueError:
+        return joined
