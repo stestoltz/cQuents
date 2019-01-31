@@ -100,12 +100,17 @@ For simplicity, in the descriptions, the expression to the left of the operator 
 | Post-Unary | Factorial | `!` | The factorial of `x`
 | Binary | Addition | `+` | Adds `x` to `y`
 | Binary | Subtraction | `-` | Subtracts `y` from `x`
-| Binary | Concatentation | `~` | Concatenates `y` to `x`
+| Binary | Concatenation | `~` | Concatenates `y` to `x`
 | Binary | Multiplication | `*`, implicit | Multiplies `x` by `y`; can be used implicitly, as in Algebra: `2z`, `2(1+$)`
 | Binary | Division | `/` | Divides `x` by `y`
-| Binary | Exponentation | `^` | Returns `x` to the power of `y`
+| Binary | Exponentiation | `^` | Returns `x` to the power of `y`
 | Binary | Modulus | `%` | Gets `x` mod `y`
 | Binary | Scientific | `e` | Returns `x` times ten to the power of `y`
+| Binary | Equality | `=` | Python: `x == y`
+| Binary | Less than | `<` | Python: `x < y`
+| Binary | Greater than | `>` | Python: `x > y`
+| Binary | And | `&` | Python: `x and y`
+| Binary | Or | `\|` | Python: `x or y`
 
 \* note that trailing `)`s right before the end of your code can all be left off
 
@@ -128,6 +133,9 @@ The character `_` signifies an two-byte operation.
 | Binary | Bitwise NAND | `_N` | Python: `~(x & y)`
 | Binary | Bitwise Left Shift | `_{` | Python: `x << y`
 | Binary | Bitwise Right Shift | `_}` | Python: `x >> y`
+| Binary | Inequality | `_=` | Python: `x != y`
+| Binary | Less than or equal to | `_<` | Python: `x < y`
+| Binary | Greater than or equal to | `_>` | Python: `x > y`
 
 ##### Operator Precedence Table
 
@@ -140,6 +148,9 @@ The character `_` signifies an two-byte operation.
 | `_&`, `_N` |
 | `_^`, `_x` |
 | `_\|`, `_n` |
+| `=`, `_=`, `<`, `_<`, `>`, `_>` |
+| `&` |
+| `\|` |
 | **Last** |
 
 #### Builtins

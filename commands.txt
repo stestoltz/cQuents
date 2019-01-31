@@ -77,6 +77,14 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  ^   | Exponent:         x^y
  ~   | Concatenation:    x~y
  e   | Scientific Notation: xey
+ =   | Equality:         x=y
+ _=  | Inequality:       x_=y
+ <   | Less than:        x<y
+ _<  | Less than or equal to: x_<y
+ >   | Greater than:     x>y
+ _>  | Greater than or equal to: x_>y
+ &   | Logical and:      x&y
+ |   | Logical or:       x|y
  _|  | Bitwise or:       x_|y
  _n  | Bitwise nor:      x_ny
  _^  | Bitwise xor:      x_^y
@@ -137,17 +145,17 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  #TODO: GCD, LCM, toBase, more trig functions, 
 
 -----| All ASCII
- \n  | (Literal newline) start new program on next line; can be called with \0 to \9
+ \n  | (Literal newline) start new program on next line; can be referenced with a-d
 ' '  | (Space) #eats all container closers (")", "]", "}", etc.)
- !   | Factorial
+ !   | Factorial / # logical not
  "   | (param stringify) literal quotes
- #   | (param default input)
+ #   | (param default input) # if true add to sequence
  $   | current index
  %   | modulus
- &   |
+ &   | logical and
  '   | literal quotes
  (   | Opening parenthesis.
- )   | Closing parenthesis for functions or opening parenthsis. Can be left off of program if before EOF or newline.
+ )   | Closing parenthesis for functions or opening parenthesis. Can be left off of program if before EOF or newline.
  *   | multiplication
  +   | addition
  ,   | item/term separator
@@ -164,28 +172,28 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  7   | seven
  8   | eight
  9   | nine
- :   | (mode series)
+ :   | (mode series) # ternary finish
  ;   | (mode sum), function separator
- <   |
- =   | (param start)
- >   |
- ?   | (mode query)
+ <   | less than
+ =   | (param start) equality
+ >   | greater than
+ ?   | (mode query) # ternary start
  @   | literal escape
  A   | first input
  B   | second input
  C   | third input
  D   | digits
- E   |
+ E   | # apply function to finite sequence
  F   | floor
  G   | # GCD
  H   |
  I   | input func
- J   |
+ J   | # to base
  K   |
  L   | length
  M   | max
  N   |
- O   |
+ O   | OEIS
  P   | previous func
  Q   | deduplicate
  R   | round
@@ -193,25 +201,25 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  T   | ceiling
  U   | sum
  V   | average
- W   |
+ W   | # positive integers not yet in sequence, smallest to largest
  X   | third previous term
  Y   | second previous term
  Z   | previous term
- [   |
+ [   | # index start
  \   | extra builtins start
- ]   |
+ ]   | # index finish
  ^   | exponentiation
  _   | extra operators start
  `   | constants start
  a   | first line
  b   | second line
  c   | third line
- d   | lines func
+ d   | lines function
  e   | scientific notation
  f   | factorial
  g   | # LCM
  h   | char
- i   |
+ i   | # in
  j   | join
  k   | like $, but if there are multiple terms, it only increments when the terms reset
  l   | logarithm (default base e)
@@ -219,17 +227,17 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  n   | input n
  o   | ordinal
  p   | next prime
- q   |
+ q   | # prime factors
  r   | root
  s   | sort
  t   | ten
  u   | count
  v   | absolute value
- w   |
+ w   | # smallest positive integer not yet in sequence
  x   | exp
  y   |
- z   |
- {   |
- |   | (meta separator)
- }   |
+ z   | # divisors
+ {   | start finite sequence
+ |   | (meta separator) logical or
+ }   | close finite sequence
  ~   | concatenation

@@ -201,7 +201,12 @@ binary_ops = {
     "/": lambda x, y: x / y,
     "^": lambda x, y: x ** y,
     "%": lambda x, y: x % y,
-    "e": lambda x, y: x * (10 ** y)
+    "e": lambda x, y: x * (10 ** y),
+    "=": lambda x, y: int(x == y),
+    "<": lambda x, y: int(x < y),
+    ">": lambda x, y: int(x > y),
+    "&": lambda x, y: int(x and y),
+    "|": lambda x, y: int(x or y)
 }
 
 EXTRA_OPS = "_"     # all extra operators have _ appended to beginning of command
@@ -221,7 +226,10 @@ extra_binary_ops = {
     EXTRA_OPS + "&": lambda x, y: x & y,        # bitwise AND
     EXTRA_OPS + "N": lambda x, y: ~(x & y),     # bitwise NAND
     EXTRA_OPS + "{": lambda x, y: x << y,       # bitwise left shift
-    EXTRA_OPS + "}": lambda x, y: x >> y        # bitwise right shift
+    EXTRA_OPS + "}": lambda x, y: x >> y,       # bitwise right shift
+    EXTRA_OPS + "=": lambda x, y: int(x != y),
+    EXTRA_OPS + "<": lambda x, y: int(x <= y),
+    EXTRA_OPS + ">": lambda x, y: int(x >= y)
 }
 
 unary_ops.update(extra_unary_ops)
@@ -236,6 +244,9 @@ def is_binary_operator(x): return x in binary_ops or x in extra_binary_ops
 
 binary_operator_precedence = [
     # last
+    ("|",),
+    ("&",),
+    ("=", "_=", "<", "_<", ">", "_>"),
     ("_|", "_n"),
     ("_^", "_x"),
     ("_&", "_N"),
