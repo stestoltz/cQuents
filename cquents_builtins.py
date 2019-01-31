@@ -250,3 +250,34 @@ def join_(origin_interpreter, parameters):
         return int(joined)
     except ValueError:
         return joined
+
+
+# https://stackoverflow.com/a/6800586/7605753
+def divisors(x):
+    result = set()
+    for i in range(1, int(math.sqrt(x)) + 1):
+        div, mod = divmod(x, i)
+        if mod == 0:
+            result |= {i, div}
+    return sorted(list(result))
+
+
+def proper_divisors(x):
+    return divisors(x)[:-1]
+
+
+# TODO: speed testing
+# https://stackoverflow.com/a/22808285/7605753
+def prime_factors(x):
+    i = primes[0]
+    factors = []
+
+    while i * i <= x:
+        if x % i:
+            i = next_prime(i)
+        else:
+            x //= i
+            factors.append(i)
+    if x > 1:
+        factors.append(x)
+    return factors

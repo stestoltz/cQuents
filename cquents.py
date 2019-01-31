@@ -145,6 +145,7 @@ builtins = {
     "o": lambda inter, node: ord(inter.visit(node.parameters[0])),
     "p": lambda inter, node: builtin_helper.next_prime(inter.visit(node.parameters[0])),
     "P": lambda inter, node: inter.get_previous(inter.visit(node.parameters[0])),
+    "q": lambda inter, node: builtin_helper.prime_factors(inter.visit(node.parameters[0])),
     "Q": lambda inter, node: builtin_helper.deduplicate(inter.visit(node.parameters[0])),
     "r": lambda inter, node: builtin_helper.root(inter, node.parameters),
     "R": lambda inter, node: round(inter.visit(node.parameters[0])),
@@ -155,7 +156,8 @@ builtins = {
     "U": lambda inter, node: builtin_helper.sum_(inter.visit(node.parameters[0])),
     "v": lambda inter, node: abs(inter.visit(node.parameters[0])),
     "V": lambda inter, node: builtin_helper.average(inter.visit(node.parameters[0])),
-    "x": lambda inter, node: math.exp(inter.visit(node.parameters[0]))
+    "x": lambda inter, node: math.exp(inter.visit(node.parameters[0])),
+    "z": lambda inter, node: builtin_helper.divisors(inter.visit(node.parameters[0]))
 }
 
 EXTRA_BUILTINS = "\\"   # all have \ appended to beginning of command
@@ -166,7 +168,8 @@ extra_builtins = {
     EXTRA_BUILTINS + "r": lambda inter, node: builtin_helper.reverse(inter, node.parameters),
     EXTRA_BUILTINS + "R": lambda inter, node: builtin_helper.rotate(inter, node.parameters),
     EXTRA_BUILTINS + "s": lambda inter, node: math.sin(inter.visit(node.parameters[0])),
-    EXTRA_BUILTINS + "t": lambda inter, node: math.tan(inter.visit(node.parameters[0]))
+    EXTRA_BUILTINS + "t": lambda inter, node: math.tan(inter.visit(node.parameters[0])),
+    EXTRA_BUILTINS + "z": lambda inter, node: builtin_helper.proper_divisors(inter.visit((node.parameters[0])))
 }
 
 def get_OEIS(origin_interpreter, parameters, cq_source):
@@ -206,7 +209,8 @@ binary_ops = {
     "<": lambda x, y: int(x < y),
     ">": lambda x, y: int(x > y),
     "&": lambda x, y: int(x and y),
-    "|": lambda x, y: int(x or y)
+    "|": lambda x, y: int(x or y),
+    "i": lambda x, y: int(x in y)
 }
 
 EXTRA_OPS = "_"     # all extra operators have _ appended to beginning of command
@@ -246,7 +250,7 @@ binary_operator_precedence = [
     # last
     ("|",),
     ("&",),
-    ("=", "_=", "<", "_<", ">", "_>"),
+    ("=", "_=", "<", "_<", ">", "_>", "i"),
     ("_|", "_n"),
     ("_^", "_x"),
     ("_&", "_N"),

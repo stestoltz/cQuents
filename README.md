@@ -111,6 +111,7 @@ For simplicity, in the descriptions, the expression to the left of the operator 
 | Binary | Greater than | `>` | Python: `x > y`
 | Binary | And | `&` | Python: `x and y`
 | Binary | Or | `\|` | Python: `x or y`
+| Binary | In | `i` | Python: `x in y`
 
 \* note that trailing `)`s right before the end of your code can all be left off
 
@@ -148,7 +149,7 @@ The character `_` signifies an two-byte operation.
 | `_&`, `_N` |
 | `_^`, `_x` |
 | `_\|`, `_n` |
-| `=`, `_=`, `<`, `_<`, `>`, `_>` |
+| `=`, `_=`, `<`, `_<`, `>`, `_>`, `i` |
 | `&` |
 | `\|` |
 | **Last** |
@@ -179,6 +180,7 @@ For simplicity, in the descriptions, the individual parameters given to the func
 | Ordinal | `o` | 1 | Returns Python's `ord` of `a`
 | Next Prime | `p` | 1 | Returns the next prime **after** `a`
 | Previous Function | `P` | 1 | Returns the previous term back as many terms as `a`
+| Prime Factors | `q` | 1 | Returns the prime factors of `a`
 | Deduplicate | `Q` | 1 | Removes duplicates from `a`, retaining order
 | Root | `r` | 1 or 2 | If `b` does not exist, returns the square root of `a`. Otherwise, returns `a` to the power of the reciprocal of `b`
 | Round | `R` | 1 | Returns `a`, rounded
@@ -190,16 +192,18 @@ For simplicity, in the descriptions, the individual parameters given to the func
 | Absolute Value | `v` | 1 | Returns the absolute value of `a`
 | Average | `V` | 1 | Returns the average value of `a`
 | Exp | `x` | 1 | Returns e to the power of `a`
+| Divisors | `z` | 1 | Returns the divisors of `a`
 | Cosine | `\c` | 1 | Returns the cos of `a`
 | Logarithm 2 | `\l` | 1 | Returns the base `10` logarithm of `a`
 | Reverse | `\r` | 1 or 2 | Returns the reverse of `a`, including the decimal point if `b` exists
-| Rotate | `\R` | 2 or 3 | Returns `a` rotated by `b``, including the decimal point if `c` exists
+| Rotate | `\R` | 2 or 3 | Returns `a` rotated by `b`, including the decimal point if `c` exists
 | Sine | `\s` | 1 | Returns the sin of `a`
 | Tangent | `\t` | 1 | Returns the tan of `a`
+| Proper Divisors | `\z` | 1 | Returns the proper divisors of `a`
 
 **OEIS**
 
-Currently, there are plans for cQuents to have a dictionary of some OEIS sequences (stored as cQuents generator programs) which can be called as builtin functions. For those sequences currently implemented (see `oeis.py` for a full list), the sequence can be called with the function `O#A`, where `#` is the sequence index with all leading zeroes removed, and `A` is the alphabetic letter preceding the sequence (as of 7/24/2017 all OEIS sequences use `A`, but once the numeric index recents, the assumption is that it will start at `B`). Pass this function the (usually 1-based) index you want in the sequence - see its line in `oeis.py` for details on exactly how it is implemented in cQuents.
+Currently, there are plans for cQuents to have a dictionary of some OEIS sequences (stored as cQuents generator programs) which can be called as builtin functions. For those sequences currently implemented (see `oeis.py` for a full list), the sequence can be called with the function `O#A`, where `#` is the sequence index with all leading zeroes removed, and `A` is the alphabetic letter preceding the sequence (as of 7/24/2017 all OEIS sequences use `A`, but once the numeric index resets, the assumption is that it will start at `B`). Pass this function the (usually 1-based) index you want in the sequence - see its line in `oeis.py` for details on exactly how it is implemented in cQuents.
 
 ## Parameters
 

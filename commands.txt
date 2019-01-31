@@ -85,6 +85,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  _>  | Greater than or equal to: x_>y
  &   | Logical and:      x&y
  |   | Logical or:       x|y
+ i   | In:               xiy
  _|  | Bitwise or:       x_|y
  _n  | Bitwise nor:      x_ny
  _^  | Bitwise xor:      x_^y
@@ -111,6 +112,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  O   | OEIS:             O<seqNum><seqLetter>x)
  p   | Next Prime (exclusive): px)
  P   | Previous:         Px)
+ q   | Prime Factors:    qx)
  Q   | Deduplicate       Qx)
  r   | Root:             rx[,y]) (default y: 2)
  R   | Round:            Rx)
@@ -121,13 +123,15 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  U   | Sum:              Ux)
  v   | Absolute value:   vx)
  V   | Average:          V{...})
- x   | Exp:              Xx)
+ x   | Exp:              xx)
+ z   | Divisors:         zx)
  \c  | Cosine:           \cx)
  \l  | Log 10:           \lx)
  \r  | Reverse:          \rx[,y]) (if y exists, include "." in reversal)
  \R  | Rotate:           \Rx,y[,z]) (+y goes right, -y goes left) (if z exists, move ".")
  \s  | Sine:             \sx)
  \t  | Tangent:          \tx)
+ \z  | Proper Divisors:  \zx)
 
 -----| Constants
  `2  | 1/2
@@ -192,7 +196,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  K   |
  L   | length
  M   | max
- N   |
+ N   | # used with #
  O   | OEIS
  P   | previous func
  Q   | deduplicate
@@ -219,7 +223,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  f   | factorial
  g   | # LCM
  h   | char
- i   | # in
+ i   | in
  j   | join
  k   | like $, but if there are multiple terms, it only increments when the terms reset
  l   | logarithm (default base e)
@@ -227,7 +231,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  n   | input n
  o   | ordinal
  p   | next prime
- q   | # prime factors
+ q   | prime factors
  r   | root
  s   | sort
  t   | ten
@@ -236,7 +240,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  w   | # smallest positive integer not yet in sequence
  x   | exp
  y   |
- z   | # divisors
+ z   | divisors
  {   | start finite sequence
  |   | (meta separator) logical or
  }   | close finite sequence
