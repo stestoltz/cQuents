@@ -220,8 +220,8 @@ extra_binary_ops = {
     EXTRA_OPS + "x": lambda x, y: ~(x ^ y),     # bitwise XNOR
     EXTRA_OPS + "&": lambda x, y: x & y,        # bitwise AND
     EXTRA_OPS + "N": lambda x, y: ~(x & y),     # bitwise NAND
-    EXTRA_OPS + "<": lambda x, y: x << y,       # bitwise left shift
-    EXTRA_OPS + ">": lambda x, y: x >> y        # bitwise right shift
+    EXTRA_OPS + "{": lambda x, y: x << y,       # bitwise left shift
+    EXTRA_OPS + "}": lambda x, y: x >> y        # bitwise right shift
 }
 
 unary_ops.update(extra_unary_ops)
@@ -239,7 +239,7 @@ binary_operator_precedence = [
     ("_|", "_n"),
     ("_^", "_x"),
     ("_&", "_N"),
-    ("_<", "_>"),
+    ("_{", "_}"),
     ("-", "+", "~"),
     ("*", "/", "_/", "%"),
     ("^", "e")

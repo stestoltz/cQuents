@@ -83,8 +83,8 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  _x  | Bitwise xnor:     x_ny
  _&  | Bitwise and:      x_&y
  _N  | Bitwise nand:     x_Ny
- _<  | Bitwise left shift: x_<y
- _>  | Bitwise right shift: x_>y
+ _{  | Bitwise left shift: x_<y
+ _}  | Bitwise right shift: x_>y
 
 -----| Functions
  a   | Line 1:           a...)

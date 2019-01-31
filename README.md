@@ -120,14 +120,14 @@ The character `_` signifies an two-byte operation.
 | Unary | Increment | `_+` | Adds one to `y`
 | Unary | Decrement | `_-` | Subtracts one from `y`
 | Binary | Integer Division | `_/` | Integer divides `x` by `y`
-| Binary | Bitwise OR | `_\|` | .
-| Binary | Bitwise NOR | `_n` | .
-| Binary | Bitwise XOR | `_^` | .
-| Binary | Bitwise XNOR | `_x` | .
-| Binary | Bitwise AND | `_&` | .
-| Binary | Bitwise NAND | `_N` | .
-| Binary | Bitwise Left Shift | `_<` | .
-| Binary | Bitwise Right Shift | `_>` | .
+| Binary | Bitwise OR | `_\|` | Python: `x | y`
+| Binary | Bitwise NOR | `_n` | Python: `~(x | y)`
+| Binary | Bitwise XOR | `_^` | Python: `x ^ y`
+| Binary | Bitwise XNOR | `_x` | Python: `~(x ^ y)`
+| Binary | Bitwise AND | `_&` | Python: `x & y`
+| Binary | Bitwise NAND | `_N` | Python: `~(x & y)`
+| Binary | Bitwise Left Shift | `_{` | Python: `x << y`
+| Binary | Bitwise Right Shift | `_}` | Python: `x >> y`
 
 ##### Operator Precedence Table
 
@@ -136,7 +136,7 @@ The character `_` signifies an two-byte operation.
 | `^`, `e` |
 | `*`, `/`, `_/`, `%` |
 | `-`, `+`, `~` |
-| `_<`, `_>` |
+| `_{`, `_}` |
 | `_&`, `_N` |
 | `_^`, `_x` |
 | `_\|`, `_n` |
