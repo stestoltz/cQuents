@@ -55,6 +55,8 @@ conditionals = (IFTRUE,)
 
 APPLIER = "E"
 
+COLON = ":"
+
 DECIMAL_POINT = "."
 
 LITERAL_ESCAPE = "@"
@@ -408,6 +410,9 @@ class Lexer:
         elif self.cur == APPLIER:
             return Token(APPLIER, self.advance())
 
+        elif self.cur == COLON:
+            return Token(COLON, self.advance())
+
         if self.cur == LITERAL_ESCAPE:
             self.advance()
             return Token(LITERAL, self.advance())
@@ -586,6 +591,30 @@ class Parser:
 
         return items
 
+    def slice_items(self):
+        items = []
+
+        i = 0
+        while i <= 4 and self.token.val != RINDEX:
+
+            if self.token.type == COLON:
+                self.eat(COLON)
+
+                # expecting colon
+                if i % 2:
+                    items += [None]
+                    i += 1
+                # not expecting colon
+                else:
+                    items += [None] * 2
+                    i += 2
+            else:
+                items.append(self.expr())
+                i += 1
+
+        return items
+
+
     def input_list(self):
         items = [], []
 
@@ -693,6 +722,11 @@ class Parser:
         if post_tok.type == OPERATOR and post_tok.val in post_unary_ops:
             self.eat(OPERATOR)
             node = PostUnaryOp(post_tok, node)
+        elif post_tok.type == LCONTAINER and post_tok.val == LINDEX:
+            self.eat(LCONTAINER)
+            node_list = self.slice_items()
+            self.eat(RCONTAINER)
+            node = Index(node, node_list)
 
         return node
 
@@ -720,6 +754,13 @@ class Tester(NodeVisitor):
     def visit_FiniteSequence(self, node):
         for term in node.parameters:
             self.visit(term)
+
+    def visit_Index(self, node):
+        self.visit(node.base_node)
+        for i, option in enumerate(node.options):
+            # only options at indexes 0, 2, 4 are ASTs
+            if i % 2 == 0:
+                self.visit(option)
 
     def visit_BinOp(self, node):
         self.visit(node.left)
@@ -931,6 +972,23 @@ class Interpreter(NodeVisitor):
             terms.append(self.visit(term))
 
         return terms
+
+    def visit_Index(self, node):
+        base = self.visit(node.base_node)
+
+        if len(node.options) == 1:
+            return base[self.visit(node.options[0])]
+        elif len(node.options) == 2:
+            return base[slice(self.visit(node.options[0]) if node.options[0] else None, None, None)]
+        elif 3 <= len(node.options) <= 4:
+            return base[slice(self.visit(node.options[0]) if node.options[0] else None,
+                              self.visit(node.options[2]) if node.options[2] else None, None)]
+        elif len(node.options) == 5:
+            return base[slice(self.visit(node.options[0]) if node.options[0] else None,
+                              self.visit(node.options[2]) if node.options[2] else None,
+                              self.visit(node.options[4]) if node.options[4] else None)]
+
+        raise CQSyntaxError("Error indexing - attempted to index with options length " + str(len(node.options)))
 
     def visit_BinOp(self, node):
         left = self.visit(node.left)

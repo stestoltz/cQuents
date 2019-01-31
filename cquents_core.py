@@ -99,6 +99,15 @@ class FiniteSequence(AST):
         return "<FiniteSequence: " + ",".join(str(node) for node in self.parameters) + ">"
 
 
+class Index(AST):
+    def __init__(self, base_node, options):
+        self.base_node = base_node
+        self.options = options
+
+    def __str__(self):
+        return "<Index: " + str(self.base_node) + str(self.options) + ">"
+
+
 class BinOp(AST):
     def __init__(self, left, op, right):
         self.left = left

@@ -17,6 +17,7 @@ To try cQuents, [click here for an online interpreter](https://tio.run/#cquents)
       - [Operations](https://github.com/stestoltz/cQuents#operations)
       - [Builtins](https://github.com/stestoltz/cQuents#builtins)
       - [Conditionals](https://github.com/stestoltz/cQuents#conditionals)
+      - [Lists](https://github.com/stestoltz/cQuents#lists)
     - [Parameters](https://github.com/stestoltz/cQuents#parameters)
       - [Literals](https://github.com/stestoltz/cQuents#literals)
       - [Default Input](https://github.com/stestoltz/cQuents#default-input)
@@ -159,7 +160,7 @@ The character `_` signifies an two-byte operation.
 
 #### Builtins
 
-Builtin function are called with their identifier, a comma-delimited list of their parameters, and a closing parenthesis (`)`). Remember that trailing `)`s can be left off.
+Builtin function are called with their identifier, a `;`-delimited list of their parameters, and a closing parenthesis (`)`). Remember that trailing `)`s can be left off.
 
 For simplicity, in the descriptions, the individual parameters given to the functions are `a,b,c, ...`.
 
@@ -205,7 +206,7 @@ For simplicity, in the descriptions, the individual parameters given to the func
 | Smallest | `\w` | 1 | Returns the `a`th smallest positive integer not yet in the sequence
 | Proper Divisors | `\z` | 1 | Returns the proper divisors of `a`
 
-Note: you can use `E` in front of a builtin to apply a builtin to every parameter. For example, `EL1;11;111)` will give `1,2,3`.
+Note: you can use `E` in front of a builtin to apply the builtin to every parameter. For example, `EL1;11;111)` will give `1,2,3`.
 
 **OEIS**
 
@@ -214,6 +215,10 @@ Currently, there are plans for cQuents to have a dictionary of some OEIS sequenc
 #### Conditionals
 
 Conditionals are started with `#` and ended with `)`. Conditionals use the variable `N`, which is the number it is checking. They return `N` when all `;` separated terms in the conditional are true.
+
+#### Lists
+
+Lists are denoted by `{}` and separated by `;`. Operators performed on lists that error will try again, this time applied to all of the list's members. Lists can be indexed and sliced like lists in Python.
 
 ## Parameters
 
