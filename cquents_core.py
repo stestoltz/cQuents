@@ -84,6 +84,9 @@ class FiniteSequence(AST):
         self.index = 0
         return self
 
+    def __getitem__(self, key):
+        return self.terms[key]
+
     def __next__(self):
         try:
             cur = self.terms[self.index]
