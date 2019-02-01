@@ -670,7 +670,7 @@ class Parser:
 
         node = next_layer()
 
-        while self.token.val in binary_operator_precedence[cur_precedence] or \
+        while self.token.type == OPERATOR and self.token.val in binary_operator_precedence[cur_precedence] or \
                 (MUL in binary_operator_precedence[cur_precedence] and self.token.can_multiply()):
 
             tok = self.token
@@ -953,7 +953,6 @@ class Interpreter(NodeVisitor):
                     except TypeError:
                         if sum_ == 0:
                             sum_ = ""
-                    finally:
                         sum_ += val
 
                     if query_n:
