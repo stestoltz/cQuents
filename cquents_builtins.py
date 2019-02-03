@@ -193,6 +193,8 @@ def count_(origin_interpreter, parameters):
         return lst.count(key)
     except AttributeError:
         return digits(lst).count(key)
+    except TypeError:
+        return lst.count(str(key))
 
 
 def min_(lst):
