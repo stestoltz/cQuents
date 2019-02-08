@@ -178,6 +178,7 @@ For simplicity, in the descriptions, the individual parameters given to the func
 | Factorial | `f` | 1 | Returns the factorial (`!`) of `a`
 | Floor | `F` | 1 | Returns the floor of `a`
 | Char | `h` | 1 | Returns Python's `chr` of `a`
+| All | `H` | 1 | `all` in Python
 | Input Function | `I` | 1 | Returns the input at the position of `a`
 | Join | `j` | 1 or 2 | Returns `a` joined on `b` (if there is no `b`, defaults to `""`)
 | To Base | `J` | 1 or 2 | Returns `a` to base `b` (if there is no `b`, defaults to base `2`)
@@ -202,6 +203,7 @@ For simplicity, in the descriptions, the individual parameters given to the func
 | Absolute Value | `v` | 1 | Returns the absolute value of `a`
 | Average | `V` | 1 | Returns the average value of `a`
 | Exp | `x` | 1 | Returns e to the power of `a`
+| Any | `y` | 1 | Any in Python
 | Divisors | `z` | 1 | Returns the divisors of `a`
 | Cosine | `\c` | 1 | Returns the cos of `a`
 | Logarithm 2 | `\l` | 1 | Returns the base `10` logarithm of `a`

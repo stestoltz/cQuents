@@ -194,7 +194,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  E   | applier: apply function to list
  F   | floor
  G   | # GCD
- H   |
+ H   | all
  I   | input func
  J   | to base
  K   | from base
@@ -243,7 +243,7 @@ Numbers are formed using . and 0-9 as would be expected. Use negation (-) for ne
  v   | absolute value
  w   | smallest positive integer not yet in sequence
  x   | exp
- y   |
+ y   | any
  z   | divisors
  {   | start finite sequence
  |   | (meta separator) logical or

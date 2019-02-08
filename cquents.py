@@ -120,6 +120,7 @@ builtins = {
     "f": lambda inter, node: math.factorial(inter.visit(node.parameters[0])),
     "F": lambda inter, node: math.floor(inter.visit(node.parameters[0])),
     "h": lambda inter, node: chr(inter.visit(node.parameters[0])),
+    "H": lambda inter, node: int(all(inter.visit(node.parameters[0]))),
     "I": lambda inter, node: inter.get_input(inter.visit(node.parameters[0])),
     "j": lambda inter, node: builtin_helper.join_(inter, node.parameters),
     "J": lambda inter, node: builtin_helper.to_base(inter, node.parameters),
@@ -143,6 +144,7 @@ builtins = {
     "v": lambda inter, node: abs(inter.visit(node.parameters[0])),
     "V": lambda inter, node: builtin_helper.average(inter.visit(node.parameters[0])),
     "x": lambda inter, node: math.exp(inter.visit(node.parameters[0])),
+    "y": lambda inter, node: int(any(inter.visit(node.parameters[0]))),
     "z": lambda inter, node: builtin_helper.divisors(inter.visit(node.parameters[0]))
 }
 
